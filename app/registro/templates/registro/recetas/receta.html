@@ -33,7 +33,7 @@
 								<p class="mb-1">
 									<strong>Fecha:</strong> {{ registro.inscripcion.campana.fecha|date:'d/m/Y' }}
 								</p>
-								<p class="mb-1">
+								<p class="mb-1 fs-4">
 									<strong>Prescripción</strong>
 								</p>
 							</div>
@@ -45,14 +45,13 @@
 									<li>En caso de retiro prematuro de puntos, anomalidades en la herida, consultar inmediatamente al médico veterinario</li>
 								</ul>
 							</div>
-							<div class="d-flex align-items-center justify-content-center fs-3">
-                <p>
+
+							<div class="prescription-dosage">
 								{% if registro.especie == '🐈' %}
-									1 Gotero 10ml Meloxicam 0.15%
+									<p class="species-text">1 Gotero 10ml Meloxicam 0.15%</p>
 								{% else %}
-									____ tabletas de Carprofeno ____ mg
+									<p class="species-text">____ tabletas de Carprofeno ____ mg</p>
 								{% endif %}
-                </p>
 							</div>
 						</div>
 						{% include 'registro/recetas/firma.html' %}
@@ -89,8 +88,8 @@
 								<p class="mb-1">
 									<strong>Edad:</strong> {% include 'registro/edad.html' with edad_anos=registro.edad_anos edad_meses=registro.edad_meses completo=True %}
 								</p>
-								<p class="mb-1">
-									<strong>Posología:</strong> {{ patient.posology }}
+								<p class="mb-1 fs-4">
+									<strong>Posología</strong> {{ patient.posology }}
 								</p>
 							</div>
 
@@ -102,17 +101,20 @@
 									<li>Retirar los puntos 10 días después de la cirugía</li>
 								</ul>
 							</div>
-							<div class="d-flex align-items-center justify-content-center fs-3">
-								<p>
-                {% if registro.especie == '🐈' %}
-									Dar ____ gotas en el hocico
-									</br>A las 08:00 y 20:00
-								{% else %}
-									Dar ____ tableta(s)
-									</br>A las 08:00
-								{% endif %}
-								</br>Durante <strong>4</strong> días</p>
 
+							<div class="prescription-dosage">
+								{% if registro.especie == '🐈' %}
+									<p class="species-text">
+										Dar ____ gotas en el hocico<br />A las <i>08:00</i> y <i>20:00</i>
+									</p>
+								{% else %}
+									<p class="species-text">
+										Dar ____ tableta(s)<br />A las <i>08:00</i>
+									</p>
+								{% endif %}
+								<p class="species-text">
+									Durante <strong>4 días</strong>
+								</p>
 							</div>
 						</div>
 
