@@ -1,3 +1,4 @@
+import json
 import logging
 
 from campana.models import Campana
@@ -228,17 +229,27 @@ def obtener_razas(request):
 
 
 def obtener_barrios(request):
-    query = request.GET.get("term", "")
-    barrio_tutor = (
-        Registro.objects.filter(
-            barrio_tutor__icontains=query,
-            inscripcion__campana__estado=Campana.Estado.PASADA,
-        )
-        .order_by("barrio_tutor")
-        .values_list("barrio_tutor", flat=True)
-        .distinct()
-    )
-    return JsonResponse(list(barrio_tutor), safe=False)
+    query = request.GET.get("term", "").lower()
+    canton = request.GET.get("canton", "")
+    parroquia = request.GET.get("parroquia", "")
+    ruta_locaciones = finders.find("assets/locaciones.json")
+
+    try:
+        with open(ruta_locaciones, "r", encoding="utf-8") as f:
+            locaciones = json.load(f)
+
+        barrios = []
+        # Filtrar por cantón y parroquia si se proporcionan
+        if canton and parroquia:
+            if canton in locaciones and parroquia in locaciones[canton]:
+                barrios_dict = locaciones[canton][parroquia]
+                barrios = [barrio for barrio in barrios_dict.keys() if query in barrio.lower()]
+                barrios.sort()
+
+        return JsonResponse(barrios, safe=False)
+    except Exception as e:
+        logger.error(f"Error al cargar locaciones {ruta_locaciones}: {e}")
+        return JsonResponse([], safe=False)
 
 
 def ver_mascota(request, id):
