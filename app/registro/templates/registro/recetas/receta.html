@@ -10,14 +10,14 @@
 		{% bootstrap_javascript %}
 	</head>
 	<body>
-		<div class="recipe">
-			<div class="prescription-form">
-				<div class="row g-0 h-100">
-					<!-- Left side -->
-					<div class="col-6 border-end recipe-side">
-						<img src="{% static 'images/happypaws.png' %}" alt="Background Logo" class="background-logo" />
-						<div class="content-wrapper">
-							<div class="professional-info">
+	<div class="receta">
+		<div class="formulario-prescripcion">
+			<div class="row g-0 h-100">
+				<!-- Left side -->
+				<div class="col-6 border-end lado-receta">
+					<img src="{% static 'images/happypaws.png' %}" alt="Background Logo" class="logo-fondo" />
+					<div class="contenedor-contenido">
+						<div class="info-profesional">
 								<p class="mb-1">
 									<strong>Nombre Profesional:</strong> M.V.Z. Gabriela Zambonino
 								</p>
@@ -38,25 +38,25 @@
 								</p>
 							</div>
 
-							<div class="indications small">
-								<h6>Indicaciones Generales:</h6>
-								<ul>
-									<li>En la recuperación, colocar a su mascota en un espacio cerrado, a nivel del suelo, sin contacto directo</li>
-									<li>En caso de retiro prematuro de puntos, anomalidades en la herida, consultar inmediatamente al médico veterinario</li>
-								</ul>
-							</div>
+						<div class="indicaciones pequeno">
+							<h6>Indicaciones Generales:</h6>
+							<ul>
+								<li>En la recuperación, colocar a su mascota en un espacio cerrado, a nivel del suelo, sin contacto directo</li>
+								<li>En caso de retiro prematuro de puntos, anomalidades en la herida, consultar inmediatamente al médico veterinario</li>
+							</ul>
+						</div>
 
-							<div class="prescription-dosage">
-								{% if registro.especie == '🐈' %}
-									<p class="species-text">1 Gotero 10ml Meloxicam 0.15%</p>
-								{% else %}
-									<p class="species-text">____ tabletas de Carprofeno ____ mg</p>
+						<div class="dosis-prescripcion">
+							{% if registro.especie == '🐈' %}
+								<p class="texto-especie">1 Gotero 10ml Meloxicam 0.15%</p>
+							{% else %}
+								<p class="texto-especie">____ tabletas de Carprofeno ____ mg</p>
 								{% endif %}
 							</div>
 						</div>
 						{% include 'registro/recetas/firma.html' %}
 						<div class="redes-sociales">
-							<span class="social-item">
+							<span class="elemento-social">
 								<i class="bi bi-tiktok"></i>
 								<i class="bi bi-instagram"></i>
 								@happypaws.pillaro
@@ -65,11 +65,11 @@
 					</div>
 
 					<!-- Right side -->
-					<div class="col-6 recipe-side">
-						<img src="{% static 'images/animalzoo.png' %}" alt="Background Logo" class="background-logo" />
+					<div class="col-6 lado-receta">
+						<img src="{% static 'images/animalzoo.png' %}" alt="Background Logo" class="logo-fondo" />
 
-						<div class="content-wrapper">
-							<div class="patient-info">
+						<div class="contenedor-contenido">
+							<div class="info-paciente">
 								<p class="mb-1">
 									<strong>Nombre:</strong> {{ registro.nombre }}
 									<strong>#:</strong> {{ registro.numero_turno }}
@@ -93,26 +93,26 @@
 								</p>
 							</div>
 
-							<div class="indications small">
-								<h6>Indicaciones Finales:</h6>
-								<ul>
-									<li>En caso de picazón en la herida, usar collar isabelino</li>
-									<li>Suministrar la medicina en los horarios indicados</li>
-									<li>Retirar los puntos 10 días después de la cirugía</li>
-								</ul>
-							</div>
+								<div class="indicaciones pequeno">
+									<h6>Indicaciones Finales:</h6>
+									<ul>
+										<li>En caso de picazón en la herida, usar collar isabelino</li>
+										<li>Suministrar la medicina en los horarios indicados</li>
+										<li>Retirar los puntos 10 días después de la cirugía</li>
+									</ul>
+								</div>
 
-							<div class="prescription-dosage">
+								<div class="dosis-prescripcion">
 								{% if registro.especie == '🐈' %}
-									<p class="species-text">
-										Dar ____ gotas en el hocico<br />A las <i>08:00</i> y <i>20:00</i>
-									</p>
-								{% else %}
-									<p class="species-text">
-										Dar ____ tableta(s)<br />A las <i>08:00</i>
-									</p>
-								{% endif %}
-								<p class="species-text">
+								<p class="texto-especie">
+									Dar ____ gotas en el hocico<br />A las <i>08:00</i> y <i>20:00</i>
+								</p>
+							{% else %}
+								<p class="texto-especie">
+									Dar ____ tableta(s)<br />A las <i>08:00</i>
+								</p>
+							{% endif %}
+							<p class="texto-especie">
 									Durante <strong>4 días</strong>
 								</p>
 							</div>
@@ -120,7 +120,7 @@
 
 						{% include 'registro/recetas/firma.html' %}
 						<div class="redes-sociales">
-							<span class="social-item">
+							<span class="elemento-social">
 								<i class="bi bi-facebook"></i>
 								<i class="bi bi-youtube"></i>
 								Happy Paws Píllaro
