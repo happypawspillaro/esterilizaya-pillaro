@@ -1,11 +1,43 @@
 <script type="module">
-  import Autocomplete from "/static/js/autocomplete.js";
-  new Autocomplete(document.getElementById("id_barrio_tutor"), {
-    liveServer: true,
-    server: "/registro/barrios/",
-    serverParams: { q: "typed" },
-    valueField: "id",
-    labelField: "title",
-    highlightTyped: true,
-  });
+	import Autocomplete from "/static/js/autocomplete.js";
+	
+	const cantonField = document.getElementById("id_canton_tutor");
+	const parroquiaField = document.getElementById("id_parroquia_tutor");
+	const barrioField = document.getElementById("id_barrio_tutor");
+	
+	// Crear instancia de autocomplete para barrios
+	const autocompleteBarrios = new Autocomplete(barrioField, {
+		liveServer: true,
+		server: "/registro/barrios/",
+		serverParams: {
+			q: "typed",
+		},
+		valueField: "id",
+		labelField: "title",
+		highlightTyped: true,
+	});
+	
+	// Función para actualizar los parámetros del servidor
+	function actualizarParametros() {
+		barrioField.dataset.serverParams = JSON.stringify({
+			canton: cantonField.value,
+			parroquia: parroquiaField.value,
+		});
+	}
+	
+	// Actualizar parámetros cuando cambian cantón o parroquia
+	cantonField.addEventListener("change", () => {
+		actualizarParametros();
+		barrioField.value = "";
+		barrioField.dispatchEvent(new Event("input"));
+	});
+	
+	parroquiaField.addEventListener("change", () => {
+		actualizarParametros();
+		barrioField.value = "";
+		barrioField.dispatchEvent(new Event("input"));
+	});
+	
+	// Inicializar parámetros
+	actualizarParametros();
 </script>
