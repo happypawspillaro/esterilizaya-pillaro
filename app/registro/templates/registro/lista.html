@@ -3,93 +3,98 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% block title %}
-  Ver todos los registrados
+	Ver todos los registrados
 {% endblock %}
 {% block breadcrumb %}
-  {% include 'campana/breadcrumb.html' %}
+	{% include 'campana/breadcrumb.html' %}
 {% endblock %}
 
 {% block content %}
-  <div class="container my-2">
-    <h3 class="text-center mb-2">Todos los registros</h3>
-    <h4 class="text-center text-muted mb-4">{{ campana.nombre }}</h4>
-    <div class="text-center mb-4">
-      {% url 'inscripcion:index' campana.id as url_mascota %}
-      {% bootstrap_button '<i class="bi bi-plus-circle"></i> Registrar Mascota' button_type='link' href=url_mascota size='lg' %}
-    </div>
+	<div class="container my-2">
+		<h3 class="text-center mb-2">Todos los registros</h3>
+		<h4 class="text-center text-muted mb-4">{{ campana.nombre }}</h4>
+		<div class="text-center mb-4">
+			{% url 'inscripcion:index' campana.id as url_mascota %}
+			{% bootstrap_button '<i class="bi bi-plus-circle"></i> Registrar Mascota' button_type='link' href=url_mascota size='lg' %}
+		</div>
 
-    <div class="card shadow-sm mb-5">
-      <div class="card-body">
-        <h5 class="card-title mb-3">Buscar participantes</h5>
-        <form class="row g-2" method="get" action="{% url 'registro:lista' campana.id %}">
-          <div class="col-md-6">
-            <input type="text" name="query" placeholder="Buscar por tutor" class="form-control" />
-          </div>
-          <div class="col-auto">
-            {% bootstrap_button '<i class="bi bi-search"></i> Buscar' %}
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-  <div class="card shadow-sm">
-    <div class="card-body">
-      {% if registros %}
-        <h5 class="card-title mb-4"><i class="bi bi-list"></i> Mascotas inscritas</h5>
-        {% if registros.has_other_pages %}
-          {% bootstrap_pagination registros %}
-        {% endif %}
-        <div class="table-responsive-sm">
-          <table class="table table-striped table-hover align-middle">
-            <thead class="table-success">
-              <tr>
-                <th>ID</th>
-                <th>Número Turno</th>
-                <th>Foto</th>
-                <th>Nombre Mascota</th>
-                <th>Nombre Tutor</th>
-                <th>Especie</th>
-                <th>Género</th>
-                {% if request.user.is_authenticated %}
-                  <th>Ver Ficha</th>
-                  <th>Imprimir ficha</th>
-                {% endif %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for registro in registros %}
-                <tr>
-                  <td>{{ registro.id }}</td>
-                  <td>
-                    <span class="badge bg-primary">{{ registro.numero_turno }}</span>
-                  </td>
-                  <td>
-                    {% include 'registro/foto.html' with foto=registro.foto nombre=registro.nombre especie=registro.especie clase='imagen-mascotas' thumbnail=True %}
-                  </td>
-                  <td>{{ registro.nombre }}</td>
-                  <td>{{ registro.nombres_tutor }}</td>
-                  <td>{{ registro.especie }} {{ registro.get_especie_display }}</td>
-                  <td>
-                    {% include 'registro/genero.html' with sexo=registro.sexo get_sexo_display=registro.get_sexo_display %}
-                  </td>
-                  {% if request.user.is_authenticated %}
-                    <td>
-                      {% url 'registro:ver_ficha' registro.inscripcion.campana.id registro.id as url_ficha %}
-                      {% bootstrap_button '<i class="bi bi-eye"></i> Ver Ficha' button_type='link' href=url_ficha size='sm' button_class='btn-success' %}
-                    </td>
-                    <td>
-                      {% url 'registro:generar_pdf' registro.id as url_imprimir %}
-                      {% bootstrap_button '<i class="bi bi-printer"></i> Imprimir ficha' button_type='link' href=url_imprimir size='sm' %}
-                    </td>
-                  {% endif %}
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <h3>No hay mascotas registradas, por favor registre una</h3>
-      {% endif %}
-    </div>
-  </div>
+		<div class="card shadow-sm mb-5">
+			<div class="card-body">
+				<h5 class="card-title mb-3">Buscar participantes</h5>
+				<form class="row g-2" method="get" action="{% url 'registro:lista' campana.id %}">
+					<div class="col-md-6">
+						<input type="text" name="query" placeholder="Buscar por tutor" class="form-control" />
+					</div>
+					<div class="col-auto">
+						{% bootstrap_button '<i class="bi bi-search"></i> Buscar' %}
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="card shadow-sm">
+		<div class="card-body">
+			{% if registros %}
+				<h5 class="card-title mb-4"><i class="bi bi-list"></i> Mascotas inscritas</h5>
+				{% if registros.has_other_pages %}
+					{% bootstrap_pagination registros %}
+				{% endif %}
+				<div class="table-responsive-sm">
+					<table class="table table-striped table-hover align-middle">
+						<thead class="table-success">
+							<tr>
+								<th>ID</th>
+								<th>Número Turno</th>
+								<th>Nombre Mascota</th>
+								<th>Foto</th>
+								<th>Nombre Tutor</th>
+								<th>Especie</th>
+								<th>Género</th>
+								{% if request.user.is_authenticated %}
+									<th>Ver Ficha</th>
+									<th>Imprimir ficha</th>
+								{% endif %}
+							</tr>
+						</thead>
+						<tbody>
+							{% for registro in registros %}
+								<tr>
+									<td>{{ registro.id }}</td>
+									<td>
+										<span class="badge bg-primary">{{ registro.numero_turno }}</span>
+									</td>
+									<td>
+										<a href="{{ registro.get_absolute_url }}">{{ registro.nombre }}</a>
+									</td>
+									<td>
+										{% include 'registro/foto.html' with foto=registro.foto nombre=registro.nombre especie=registro.especie clase='imagen-mascotas' thumbnail=True %}
+									</td>
+									<td>{{ registro.nombres_tutor }}</td>
+									<td>{{ registro.especie }} {{ registro.get_especie_display }}</td>
+									<td>
+										{% include 'registro/genero.html' with sexo=registro.sexo get_sexo_display=registro.get_sexo_display %}
+									</td>
+									{% if request.user.is_authenticated %}
+										<td>
+											{% url 'registro:ver_ficha' registro.inscripcion.campana.id registro.id as url_ficha %}
+											{% bootstrap_button '<i class="bi bi-eye"></i> Ver Ficha' button_type='link' href=url_ficha size='sm' button_class='btn-success' %}
+										</td>
+										<td>
+											{% url 'registro:generar_pdf' registro.id as url_imprimir %}
+											{% bootstrap_button '<i class="bi bi-printer"></i> Imprimir ficha' button_type='link' href=url_imprimir size='sm' %}
+										</td>
+									{% endif %}
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% if registros.has_other_pages %}
+					{% bootstrap_pagination registros %}
+				{% endif %}
+			{% else %}
+				<h3>No hay mascotas registradas, por favor registre una</h3>
+			{% endif %}
+		</div>
+	</div>
 {% endblock %}
