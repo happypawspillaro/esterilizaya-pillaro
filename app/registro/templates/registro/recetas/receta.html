@@ -16,7 +16,7 @@
 			<div class="formulario-prescripcion">
 				<div class="row g-0 h-100">
 					<!-- Left side -->
-					<div class="col-6 border-end lado-receta">
+					<div class="col-6 border-end border-1 border-dark lado-receta">
 						<img
 							src="{% static 'images/happypaws.png' %}"
 							alt="Background Logo"
@@ -35,8 +35,8 @@
 									<strong>N° Registro SENESCYT:</strong> 1020-14-1296670
 								</p>
 								<p class="mb-1">
-									<strong>Fecha:</strong> {{
-									registro.inscripcion.campana.fecha|date:'d/m/Y' }}
+									<strong>Fecha:</strong> 
+									{{ registro.inscripcion.campana.fecha|date:'d/m/Y' }}
 								</p>
 								<p class="mb-1 fs-5">
 									<strong>Prescripción</strong>
@@ -69,7 +69,7 @@
 										style="height: 90px"
 									/>
 								</div>
-								<p class="texto-especie">1 Gotero 10ml Meloxicam 0.15%</p>
+								<p class="texto-especie">1 Gotero 10ml <br/>Meloxicam 0.15%</p>
 								{% else %}
 								<div style="display: flex; align-items: center">
 									<span style="margin-right: 10px"
@@ -81,7 +81,7 @@
 										style="height: 90px"
 									/>
 								</div>
-								<p class="texto-especie">____ tabletas de Carprofeno ____ mg</p>
+								<p class="texto-especie">_____ tabletas de <br/>Carprofeno _____ mg</p>
 								{% endif %}
 							</div>
 						</div>
@@ -106,8 +106,8 @@
 						<div class="contenedor-contenido">
 							<div class="info-paciente">
 								<p class="mb-1">
-									<strong>Nombre:</strong> {{ registro.nombre }} <strong>#:</strong> {{
-									registro.numero_turno }} <strong>Peso:</strong> {{ registro.peso }} Kg
+									<strong>Nombre:</strong> {{ registro.nombre }} <strong>#:</strong> 
+									{{ registro.numero_turno }} <strong>Peso:</strong> {{ registro.peso }} Kg
 								</p>
 								<p class="mb-1">
 									<strong>Especie:</strong> {{ registro.get_especie_display }}
@@ -117,13 +117,12 @@
 									<strong>Propietario:</strong> {{ registro.nombres_tutor }}
 								</p>
 								<p class="mb-1">
-									<strong>Dirección:</strong> {{ registro.barrio_tutor }} / {{
-									registro.get_parroquia_tutor_display }}
+									<strong>Dirección:</strong> {{ registro.barrio_tutor }} / 
+									{{ registro.get_parroquia_tutor_display }}
 								</p>
 								<p class="mb-1">
-									<strong>Edad:</strong> {% include 'registro/edad.html' with
-									edad_anos=registro.edad_anos edad_meses=registro.edad_meses
-									completo=True %}
+									<strong>Edad:</strong> 
+									{% include 'registro/edad.html' with edad_anos=registro.edad_anos edad_meses=registro.edad_meses completo=True %}
 								</p>
 								<p class="mb-1 fs-5">
 									<strong>Posología</strong> {{ patient.posology }}
@@ -140,14 +139,14 @@
 							</div>
 
 							<div class="dosis-prescripcion">
-								{% if registro.especie == '🐈' %} Usar faja postquirúrgica casera <br />
+								{% if registro.especie == '🐈' %} <i>Usar faja postquirúrgica casera</i> <br />
 								<p class="texto-especie">
-									Dar ____ gotas en el hocico<br /><i>2 veces</i> al día <br />A las
+									<br />Dar ____ gotas en el hocico<br /><i>2 veces</i> al día <br />A las
 									<i>08:00</i> y <i>20:00</i><br />
 								</p>
-								{% else %} Usar cono o faja postquirúrgica casera <br />
+								{% else %} <i>Usar cono o faja postquirúrgica casera</i> <br />
 								<p class="texto-especie">
-									Dar ____ tableta(s)<br /><i>1 vez</i> al día<br />A las <i>08:00</i>
+									<br />Dar ____ tableta(s)<br /><i>1 vez</i> al día<br />A las <i>08:00</i>
 								</p>
 								{% endif %}
 								<p class="texto-especie">Durante <strong>4 días</strong></p>
