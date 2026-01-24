@@ -1,110 +1,188 @@
-{% load static %}
-{% load django_bootstrap5 %}
+{% load static %} {% load django_bootstrap5 %}
 
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recetas Veterinarias</title>
-    {% bootstrap_css %}
-    <link rel="icon" type="image/x-icon" href="{% static 'images/happypaws.ico' %}" />
-    <link href="{% static 'css/bootstrap-icons.min.css' %}" rel="stylesheet" />
-    <style>
-      @page {
-        size: A4;
-        margin: 0;
-      }
-      @media print {
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        .no-print {
-          display: none;
-        }
-      }
-      .recipe {
-        width: 180mm;
-        height: 130mm;
-        margin: 0 auto;
-        page-break-inside: avoid;
-      }
-      .prescription-form {
-        border: 1px dashed #000 !important;
-        height: 100%;
-        position: relative;
-      }
-      .recipe-side {
-        position: relative;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-      }
-      .content-wrapper {
-        padding: 15px;
-        flex: 1;
-        position: relative;
-        z-index: 2;
-        overflow: hidden;
-      }
-      .background-logo {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 80%;
-        height: auto;
-        opacity: 0.3;
-        z-index: 1;
-        pointer-events: none;
-      }
-      .patient-info,
-      .professional-info {
-        font-size: 12px;
-        position: relative;
-        z-index: 2;
-      }
-      .indications.small {
-        font-size: 10px;
-        position: relative;
-        z-index: 2;
-      }
-      .indications.small ul {
-        padding-left: 15px;
-        margin-bottom: 0.5rem;
-      }
-      .signature-area {
-        padding: 10px;
-        background: white;
-        z-index: 2;
-        margin-top: auto;
-        margin-bottom: 1px;
-      }
-      .signature-line {
-        width: 100%;
-        height: 1px;
-        background-color: #000;
-        margin-bottom: 1px;
-      }
-      .redes-sociales {
-        font-size: 0.7rem;
-        line-height: 1;
-        padding-bottom: 0.2rem;
-        text-align: center;
-        white-space: nowrap;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container-fluid p-4">
-      {% include 'registro/imprimir.html' %}
-      <!-- Recipes -->
-      {% for registro in registros %}
-        {% include 'registro/recetas/receta.html' with registro=registro %}
-      {% endfor %}
-    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Recetas Veterinarias</title>
+		{% bootstrap_css %}
+		<link rel="icon" type="image/x-icon" href="{% static 'images/happypaws.ico' %}" />
+		<link href="{% static 'css/bootstrap-icons.min.css' %}" rel="stylesheet" />
+		<style>
+			@page {
+				size: A4 portrait;
+				margin: 10mm;
+			}
+			@media print {
+				body {
+					margin: 0;
+					padding: 0;
+				}
+				.no-print {
+					display: none !important;
+				}
+			}
+			/* Medidas calculadas para 2 recetas por A4 vertical */
+			:root {
+				--page-margin: 10mm;
+				--print-gap: 6mm; /* separación entre las dos recetas */
+				--page-width: calc(210mm - (2 * var(--page-margin))); /* 190mm */
+				--receta-width: var(--page-width);
+				/* altura: (297 - 2*margen - gap) / 2 = 135.5mm */
+				--receta-height: calc(
+					(297mm - (2 * var(--page-margin)) - var(--print-gap)) / 2
+				);
+			}
+			/* contenedor principal: eliminar padding extra que provocaba desbordes */
+			.container-fluid.p-4 {
+				padding: 0;
+			}
+			.receta {
+				width: var(--receta-width);
+				height: var(--receta-height);
+				margin: 0 auto var(--print-gap);
+				box-sizing: border-box;
+				break-inside: avoid;
+				page-break-inside: avoid;
+			}
+			/* Forzar salto de página después de cada 2 recetas */
+			.receta:nth-child(2n):not(:last-child) {
+				break-after: page;
+				page-break-after: always;
+				margin-bottom: 0; /* evitar doble espacio al final de la página */
+			}
+			/* contenido interno y bordes */
+			.formulario-prescripcion {
+				border: 1px dashed #000 !important;
+				height: 100%;
+				position: relative;
+				padding: 6px;
+				box-sizing: border-box;
+				background: white;
+			
+				overflow: hidden;
+			}
+			/* Ajustes de layout internos */
+			.lado-receta {
+				position: relative;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+				box-sizing: border-box;
+			}
+			
+			/* contenido principal: menos padding para que encaje */
+			.contenedor-contenido {
+				padding: 8px;
+				flex: 1;
+				position: relative;
+				z-index: 2;
+				overflow: hidden;
+				box-sizing: border-box;
+			}
+			/* logo de fondo: tamaño controlado y menor opacidad para no interferir */
+			.logo-fondo {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 70%;
+				height: auto;
+				opacity: 0.2;
+				z-index: 1;
+				pointer-events: none;
+			}
+			/* Tipografía y espaciado para impresión */
+			body {
+				line-height: 1.05;
+				font-size: 12px;
+				color: #000;
+			}
+			/* Secciones internas */
+			.info-paciente,
+			.info-profesional {
+				font-size: 11px;
+				position: relative;
+				z-index: 2;
+				margin-bottom: 2px;
+			}
+			.indicaciones.pequeno {
+				font-size: 10px;
+				position: relative;
+				z-index: 2;
+			}
+			
+			.indicaciones.pequeno ul {
+				padding-left: 12px;
+				margin-bottom: 2px;
+			}
+			/* firma y sello: reducir espacio para que quepa en la mitad */
+			.area-firma {
+				padding: 6px 4px;
+				background: white;
+				z-index: 2;
+				margin-top: auto;
+				margin-bottom: 1px;
+				font-size: 11px;
+			}
+			
+			.linea-firma {
+				width: 100%;
+				height: 2px;
+				background-color: #000;
+				margin-bottom: 1px;
+			}
+			.redes-sociales {
+				font-size: 0.7rem;
+				line-height: 1;
+				padding-bottom: 0.2rem;
+				text-align: center;
+				white-space: nowrap;
+			}
+			/* dosis y textos grandes: usar clamp para que sea responsive al ancho */
+			.dosis-prescripcion {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				flex-grow: 1;
+				font-size: 12px;
+				position: relative;
+				z-index: 2;
+				padding: 6px 0;
+			}
+			.texto-especie {
+				font-size: clamp(16px, 3.2vw, 20px); /* escala entre 16 y 20 px según ancho */
+				margin: 2px 0;
+				line-height: 1.5;
+				padding: 0 4px;
+			}
+			/* prevenir que iconos o logos grandes desborden */
+			img,
+			.logo-fondo {
+				max-width: 100%;
+				height: auto;
+				display: block;
+			}
+			/* si quieres, ajustar micro-márgenes antes de imprimir */
+			@media print {
+				.receta {
+					page-break-inside: avoid;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container-fluid p-4">
+			{% include 'registro/imprimir.html' %}
+			<!-- Recipes -->
+			{% for registro in registros %}
+				{% include 'registro/recetas/receta.html' with registro=registro %}
+			{% endfor %}
+		</div>
 
-    {% bootstrap_javascript %}
-  </body>
+		{% bootstrap_javascript %}
+	</body>
 </html>
