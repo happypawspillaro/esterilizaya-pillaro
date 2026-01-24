@@ -6,6 +6,9 @@ DEBUG = False
 ADMINS = [("José Jácome", "josejacomeb@gmail.com")]
 ALLOWED_HOSTS = [*retornar_urls(), "localhost", "nginx"]
 STATIC_ROOT = BASE_DIR / "static"  # noqa: F405
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # noqa: F405
+]
 # Configuraciones de seguridad
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True

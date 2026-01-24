@@ -232,7 +232,12 @@ def obtener_barrios(request):
     query = request.GET.get("term", "").lower()
     canton = request.GET.get("canton", "")
     parroquia = request.GET.get("parroquia", "")
+
+    # Intentar múltiples ocasiones para encontrar el archivo
     ruta_locaciones = finders.find("assets/locaciones.json")
+    if not ruta_locaciones:
+        # Intento a la ruta directa si finders.find falla en encontrarlo
+        ruta_locaciones = settings.BASE_DIR / "static" / "assets" / "locaciones.json"
 
     try:
         with open(ruta_locaciones, "r", encoding="utf-8") as f:
