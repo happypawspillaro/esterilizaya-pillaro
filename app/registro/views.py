@@ -162,7 +162,6 @@ class RegistradoListView(ListView):
                     "sexo",
                     "edad_anos",
                     "edad_meses",
-                    "fecha_registro",
                     "observaciones",
                     "numero_turno",
                     "nombres_tutor",

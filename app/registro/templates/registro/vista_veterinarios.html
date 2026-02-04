@@ -16,12 +16,12 @@
   </head>
   <body>
     <h2 class="text-center mb-4">Lista de Mascotas Registradas</h2>
+    <h2 class="text-center mb-4">Fecha: {{ fecha_campana }}</h2>
     <div class="table-responsive">
       <table class="table table-bordered table-hover table-striped table-sm">
         <thead class="table-light">
           <tr>
             <th>No.</th>
-            <th>Fecha</th>
             <th>Origen</th>
             <th>Foto</th>
             <th>Nombre Tutor</th>
@@ -62,9 +62,8 @@
             const $row = $('<tr>')
             if (mascota.sexo === '♂️') $row.addClass('table-info')
             const date = new Date(mascota.fecha_registro)
-            const formattedDate = [String(date.getDate()).padStart(2, '0'), String(date.getMonth() + 1).padStart(2, '0'), date.getFullYear()].join('/')
             $row.append($('<td>').text(mascota.numero_turno))
-            $row.append($('<td>').text(formattedDate))
+            // Poner de la calle
             $row.append($('<td>').text('C'))
             const $img = $('<img>')
               .attr('src', mascota.foto === '' ? obtenerFotoDefecto(mascota.especie) : mascota.miniatura)
@@ -72,11 +71,11 @@
               .addClass('imagen-mascotas')
             $row.append($('<td>').append($img))
             $row.append($('<td>').text(mascota.nombres_tutor))
-            $row.append($('<td>').text(mascota.especie === '🐈' ? 'Felino' : 'Canino'))
+            $row.append($('<td>').text(mascota.especie === '🐈' ? '🐈 Felino' : '🐕 Canino'))
             $row.append($('<td>').text(mascota.peso))
             $row.append($('<td>').text(mascota.nombre))
             $row.append($('<td>').text(mascota.vulnerable === true ? '✅' : ''))
-            $row.append($('<td>').text(mascota.sexo))
+            $row.append($('<td>').text(mascota.sexo === '♂️' ? '♂️ Macho' : '♀️ Hembra'))
             $row.append($('<td>').text(`${mascota.edad_anos}a ${mascota.edad_meses}m`))
             $row.append($('<td>').text(mascota.observaciones))
             $row.append($('<td>').text(''))
