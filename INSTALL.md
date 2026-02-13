@@ -68,8 +68,11 @@ Estas instrucciones están indicadas para usuarios que corran en sistemas basado
 
    ```bash
       docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+      # En caso de no tener tu ruta de migración, inicializa y da permisos para escribir
+      RUTA_MIGRACION=app/tu_app/migrations
+      sudo mkdir -p $RUTA_MIGRACION && sudo touch $RUTA_MIGRACION/__init__.py && sudo chmod 777 $RUTA_MIGRACION
       docker compose -f docker-compose.yml -f docker-compose.migrate.yml up db -d
-      docker compose -f docker-compose.yml -f docker-compose.migrate.yml up web
+      docker compose -f docker-compose.yml -f docker-compose.migrate.yml -f docker-compose.dev.yml up web
    ```
 
 7. Crea un nuevo superusuario del sistema, con el siguiente comando:

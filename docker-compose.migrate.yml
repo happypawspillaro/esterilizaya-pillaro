@@ -5,4 +5,4 @@ services:
    target: prod
   volumes:
    - ./app:/home/esterilizaya/code
-  command: sh -c "python manage.py makemigrations campana inscripcion registro && python manage.py migrate"
+  command: sh -c "python manage.py makemigrations && python manage.py migrate"
