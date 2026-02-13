@@ -24,6 +24,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 INSTALLED_APPS = [
     "cuenta.apps.CuentaConfig",
     "campana.apps.CampanaConfig",
+    "catalogo.apps.CatalogoConfig",
     "inscripcion.apps.InscripcionConfig",
     "inicio.apps.InicioConfig",
     "registro.apps.RegistroConfig",
