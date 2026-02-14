@@ -16,6 +16,8 @@ class ProductoBase(models.Model):
     # Estos son los precios 'sugeridos' que se copiarán a la campaña
     costo = models.DecimalField(max_digits=10, decimal_places=2)
     precio_publico = models.DecimalField(max_digits=10, decimal_places=2)
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nombre}"
