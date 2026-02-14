@@ -29,7 +29,11 @@ def index(request):
             instancia = forma.save(commit=False)
             instancia.usuario = usuario
             instancia.save()
-            messages.success(request, "¡Campaña registrada exitosamente!")
+            messages.success(
+                request,
+                "¡Campaña registrada exitosamente! Revisa en el administrador "
+                "los items creados por defecto para esta campaña.",
+            )
             return redirect("inicio:index")
         else:
             forma.clean()
