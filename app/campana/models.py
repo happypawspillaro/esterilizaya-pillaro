@@ -1,5 +1,6 @@
 import logging
 
+from catalogo.models import ProductoBase
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -63,3 +64,17 @@ class Campana(models.Model):
 
     def get_absolute_url(self):
         return reverse("campana:mostrar", args=[self.fecha.year, self.parroquia, self.fecha.month, self.fecha.day])
+
+
+class ItemCampana(models.Model):
+    campana = models.ForeignKey(Campana, on_delete=models.CASCADE)
+    # Previene eliminar un producto que se ha usado en una campaña,
+    # lo cual es importante para mantener la integridad histórica de los datos.
+    producto = models.ForeignKey(ProductoBase, on_delete=models.PROTECT)
+    # Guardamos los costos reales usados en esta campaña, lo cual es crucial para mantener la integridad histórica #
+    # de los datos, incluso si los precios en el catálogo cambian posteriormente.
+    costo = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+    precio_publico = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+
+    def __str__(self):
+        return f"{self.producto.nombre} @ {self.campana.nombre}"
