@@ -1,10 +1,13 @@
+import logging
 from decimal import Decimal
 
-from django.db.models import F, Sum, Value
+from django.db.models import DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce
 from pago.models import PagoExtra, PagoOtro, PagoProducto, PagoServicio
 
 from .models import Campana
+
+logger = logging.getLogger(__name__)
 
 
 def reporte_financiero(campana_id: int) -> dict:
@@ -16,21 +19,37 @@ def reporte_financiero(campana_id: int) -> dict:
     productos = PagoProducto.objects.filter(pago__registro__inscripcion__campana=campana)
     extras = PagoExtra.objects.filter(pago__registro__inscripcion__campana=campana)
     otros = PagoOtro.objects.filter(pago__registro__inscripcion__campana=campana)
-
-    total_costo = (
-        servicios.aggregate(total=Coalesce(Sum("costo_veterinario"), Value(0)))["total"]
-        + productos.aggregate(total=Coalesce(Sum(F("costo_unitario") * F("cantidad")), Value(0)))["total"]
-        +
-        # extras y otros no tienen costo (por ahora), así que sumamos 0
-        Decimal(0)
-    )
-
-    total_ingreso = (
-        servicios.aggregate(total=Coalesce(Sum("precio"), Value(0)))["total"]
-        + productos.aggregate(total=Coalesce(Sum(F("precio_unitario") * F("cantidad")), Value(0)))["total"]
-        + extras.aggregate(total=Coalesce(Sum("precio"), Value(0)))["total"]
-        + otros.aggregate(total=Coalesce(Sum("precio"), Value(0)))["total"]
-    )
+    logger.debug(f"Servicios encontrados: {servicios.count()}")
+    logger.debug(f"Productos encontrados: {productos.count()}")
+    logger.debug(f"Extras encontrados: {extras.count()}")
+    logger.debug(f"Otros encontrados: {otros.count()}")
+    # Cálculo del total de costos
+    total_costo_servicios = servicios.aggregate(
+        total=Coalesce(Sum("costo_veterinario"), Value(0, output_field=DecimalField()))
+    )["total"]
+    total_costo_productos = productos.aggregate(
+        total=Coalesce(
+            Sum(F("costo_unitario") * F("cantidad"), output_field=DecimalField()), Value(0, output_field=DecimalField())
+        )
+    )["total"]
+    total_costo = total_costo_servicios + total_costo_productos + Decimal(0)
+    # Cálculo del total de ingresos
+    total_ingresos_servicios = servicios.aggregate(
+        total=Coalesce(Sum("precio"), Value(0, output_field=DecimalField()))
+    )["total"]
+    total_ingresos_productos = productos.aggregate(
+        total=Coalesce(
+            Sum(F("precio_unitario") * F("cantidad"), output_field=DecimalField()),
+            Value(0, output_field=DecimalField()),
+        )
+    )["total"]
+    total_ingresos_extras = extras.aggregate(total=Coalesce(Sum("precio"), Value(0, output_field=DecimalField())))[
+        "total"
+    ]
+    total_ingresos_otros = otros.aggregate(total=Coalesce(Sum("precio"), Value(0, output_field=DecimalField())))[
+        "total"
+    ]
+    total_ingreso = total_ingresos_servicios + total_ingresos_productos + total_ingresos_extras + total_ingresos_otros
 
     # Detalle combinado
     detalle = []

@@ -19,24 +19,28 @@
 					<div class="col-md-4">
 						<div class="p-3 border rounded">
 							<span class="text-muted">Costo total</span>
-							<h3 class="text-danger">$ {{ total_cost|floatformat:2 }}</h3>
+							<h3 class="text-danger">$ {{ total_costo|floatformat:2 }}</h3>
 						</div>
 					</div>
 					<div class="col-md-4">
 						<div class="p-3 border rounded">
 							<span class="text-muted">Ingreso total</span>
-							<h3 class="text-success">$ {{ total_revenue|floatformat:2 }}</h3>
+							<h3 class="text-success">$ {{ total_ingreso|floatformat:2 }}</h3>
 						</div>
 					</div>
 					<div class="col-md-4">
 						<div class="p-3 border rounded">
 							<span class="text-muted">Ganancia neta</span>
-							<h3 class="{% if profit >= 0 %}
+							<h3 class="{% if ganancia >= 0 %}
+									
 									profit-positive
+
 								{% else %}
+									
 									profit-negative
+
 								{% endif %}">
-								$ {{ profit|floatformat:2 }}
+								$ {{ ganancia|floatformat:2 }}
 							</h3>
 						</div>
 					</div>
@@ -57,21 +61,15 @@
 								<th class="text-center">Cantidad</th>
 								<th class="text-end">Costo total</th>
 								<th class="text-end">Ingreso total</th>
-								<th class="text-end">Margen</th>
 							</tr>
 						</thead>
 						<tbody>
-							{% for item in detail %}
+							{% for item in detalle %}
 								<tr>
-									<td>{{ item.product_name|default:item.description }}</td>
-									<td class="text-center">{{ item.total_quantity }}</td>
-									<td class="text-end">$ {{ item.total_cost|floatformat:2 }}</td>
-									<td class="text-end">$ {{ item.total_revenue|floatformat:2 }}</td>
-									<td class="text-end {% if item.total_revenue >= item.total_cost %}
-											profit-positive
-										{% else %}
-											profit-negative
-										{% endif %}">$ {{ item.total_revenue|add:'-'|add:item.total_cost|floatformat:2 }}</td>
+									<td>{{ item.descripcion }}</td>
+									<td class="text-center">{{ item.cantidad }}</td>
+									<td class="text-end">$ {{ item.costo_total|floatformat:2 }}</td>
+									<td class="text-end">$ {{ item.ingreso_total|floatformat:2 }}</td>
 								</tr>
 							{% empty %}
 								<tr>
@@ -82,10 +80,9 @@
 						<tfoot class="table-dark">
 							<tr>
 								<th>TOTALES</th>
-								<th class="text-center">{{ detail|length }} items</th>
-								<th class="text-end">$ {{ total_cost|floatformat:2 }}</th>
-								<th class="text-end">$ {{ total_revenue|floatformat:2 }}</th>
-								<th class="text-end">$ {{ profit|floatformat:2 }}</th>
+								<th class="text-center">{{ detalle|length }} items</th>
+								<th class="text-end">$ {{ total_costo|floatformat:2 }}</th>
+								<th class="text-end">$ {{ total_ingreso|floatformat:2 }}</th>
 							</tr>
 						</tfoot>
 					</table>
