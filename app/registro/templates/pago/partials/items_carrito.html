@@ -1,0 +1,93 @@
+{% load django_bootstrap5 %}
+{% for item in items %}
+	<div class="item-row" id="item-{{ item.id }}">
+		<div class="row align-items-center">
+			<div class="col-md-8">
+				{% if item.servicio.categoria == 'EST' %}
+					<div class="d-flex align-items-center flex-wrap">
+						<span class="badge bg-primary me-2">🔧 Servicio</span>
+						<strong>{{ item.servicio.nombre }}</strong>
+						<form class="sterilization-form ms-3" hx-post="{% url 'registro:htmx_actualizar_esterilizacion' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
+							{% csrf_token %}
+							<div class="input-group input-group-sm" style="max-width: 150px;">
+								<span class="input-group-text">$</span>
+								<input type="number" step="0.01" class="form-control" name="sterilization_price" value="{{ item.precio_unitario }}" required />
+								<button class="btn btn-outline-primary" type="submit"><i class="bi bi-arrow-repeat"></i></button>
+							</div>
+						</form>
+						<small class="text-muted ms-3">Costo vet: ${{ item.costo_unitario|floatformat:2 }}</small>
+					</div>
+				{% elif item.producto %}
+                    <div class="d-flex align-items-center flex-wrap">
+                        <span class="badge bg-success me-2">💊 Medicina</span>
+                        <strong>{{ item.producto.nombre }}</strong>
+                        {% if item.producto.tipo_medicina %}
+                            <span class="badge bg-info ms-2">{{ item.producto.get_tipo_medicina_display }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="mt-2">
+                        <span class="me-3"><i class="bi bi-tag"></i> Precio: ${{ item.precio_unitario|floatformat:2 }}</span>
+                        <span class="me-3"><i class="bi bi-cash-stack"></i> Costo: ${{ item.costo_unitario|floatformat:2 }}</span>
+                        <span class="fw-bold me-3"><i class="bi bi-calculator"></i> Subtotal: ${{ item.total_price|floatformat:2 }}</span>
+                    </div>
+                    <div class="mt-2">
+                        <span class="me-2"><i class="bi bi-hash"></i> Cantidad:</span>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    hx-post="{% url 'registro:htmx_actualizar_cantidad' registro.id item.id %}"
+                                    hx-vals='{"cantidad": {{ item.cantidad|add:"-1" }} }'
+                                    hx-target="#cart-items-container"
+                                    hx-swap="innerHTML"
+                                    {% if item.cantidad <= 1 %}disabled{% endif %}>
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <span class="btn btn-sm btn-outline-secondary disabled" style="min-width: 40px;">
+                                {{ item.cantidad }}
+                            </span>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    hx-post="{% url 'registro:htmx_actualizar_cantidad' registro.id item.id %}"
+                                    hx-vals='{"cantidad": {{ item.cantidad|add:"1" }} }'
+                                    hx-target="#cart-items-container"
+                                    hx-swap="innerHTML">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+				{% elif '[Extra]' in item.descripcion %}
+					<div class="d-flex align-items-center flex-wrap">
+						<span class="badge bg-warning text-dark me-2">➕ Extra</span>
+						<strong>{{ item.descripcion|slice:'7:' }}</strong>
+					</div>
+					<div class="mt-2">
+						<span class="me-3"><i class="bi bi-tag"></i> Precio: ${{ item.precio_unitario|floatformat:2 }}</span>
+					</div>
+				{% elif '[Otro]' in item.descripcion %}
+					<div class="d-flex align-items-center flex-wrap">
+						<span class="badge bg-secondary me-2">⭐ Otro</span>
+						<strong>{{ item.descripcion|slice:'6:' }}</strong>
+					</div>
+					<div class="mt-2">
+						<span class="me-3"><i class="bi bi-plus-square-dotted"></i> Precio: ${{ item.precio_unitario|floatformat:2 }}</span>
+					</div>
+				{% else %}
+					<div class="d-flex align-items-center flex-wrap">
+						<span class="badge bg-light text-dark me-2">📝 Item</span>
+						<strong>{{ item.descripcion }}</strong>
+					</div>
+					<div class="mt-2">
+						<span class="me-3"><i class="bi bi-tag"></i> Precio: ${{ item.precio_unitario|floatformat:2 }}</span>
+					</div>
+				{% endif %}
+			</div>
+			<div class="col-md-4 text-md-end mt-2 mt-md-0">
+				{% if not item.servicio %}
+					<button class="btn btn-sm btn-danger" hx-delete="{% url 'registro:htmx_remover_item' registro.id item.id %}" hx-target="#cart-items-container" hx-swap="innerHTML" hx-confirm="¿Eliminar este item?"><i class="bi bi-trash"></i> Eliminar</button>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+{% empty %}
+	<div class="alert alert-warning">
+		<i class="bi bi-exclamation-triangle"></i> No hay items en el carrito.
+	</div>
+{% endfor %}

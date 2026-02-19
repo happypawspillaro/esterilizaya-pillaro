@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+	Confirmar pago de {{ registro.nombre }}
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid mt-4">
+		<div class="row justify-content-center">
+			<div class="col-12 col-xl-10">
+				<div class="card shadow-sm">
+					<div class="card-header bg-success text-white">
+						<h2 class="h4 mb-0"><i class="bi bi-credit-card"></i> Confirmar pago</h2>
+					</div>
+
+					<div class="card-body">
+						<!-- Información básica -->
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<h5 class="mb-1">Mascota: {{ registro.nombre }}</h5>
+								<p class="text-muted mb-0">Turno: {{ registro.numero_turno }}</p>
+							</div>
+							<div class="col-md-6 text-md-end mt-3 mt-md-0">
+								<h5 class="fw-bold">
+									Total:
+									<span class="text-success">${{ total|floatformat:2 }}</span>
+								</h5>
+							</div>
+						</div>
+
+						<hr />
+
+						<!-- Detalle tipo tabla -->
+						<h5 class="mb-3">Detalle de la compra</h5>
+
+						<div class="table-responsive">
+							<table class="table table-sm table-hover align-middle">
+								<thead class="table-light">
+									<tr>
+										<th>Tipo</th>
+										<th>Descripción</th>
+										<th class="text-center">Cantidad</th>
+										<th class="text-end">Precio</th>
+										<th class="text-end">Subtotal</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for item in registro.items.all %}
+										<tr>
+											<td>
+												{% if item.servicio %}
+													<span class="badge bg-primary">Servicio</span>
+												{% elif item.producto %}
+													<span class="badge bg-success">Medicina</span>
+												{% elif '[Extra]' in item.descripcion %}
+													<span class="badge bg-warning text-dark">Extra</span>
+												{% elif '[Otro]' in item.descripcion %}
+													<span class="badge bg-dark">Otro</span>
+												{% else %}
+													<span class="badge bg-secondary">Item</span>
+												{% endif %}
+											</td>
+
+											<td>
+												{% if item.servicio %}
+													{{ item.servicio.nombre }}
+												{% elif item.producto %}
+													{{ item.producto.nombre }}
+												{% elif '[Extra]' in item.descripcion %}
+													{{ item.descripcion|slice:'7:' }}
+												{% elif '[Otro]' in item.descripcion %}
+													{{ item.descripcion|slice:'6:' }}
+												{% else %}
+													{{ item.descripcion }}
+												{% endif %}
+											</td>
+
+											<td class="text-center">{{ item.cantidad }}</td>
+
+											<td class="text-end">${{ item.precio_unitario|floatformat:2 }}</td>
+
+											<td class="text-end fw-semibold">${{ item.total_price|floatformat:2 }}</td>
+										</tr>
+									{% empty %}
+										<tr>
+											<td colspan="5">
+												<div class="alert alert-warning mb-0">No hay items en el carrito.</div>
+											</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+
+						<hr />
+
+						<!-- Formulario y botones -->
+						<div class="col-lg-6">
+							<form method="post" class="d-flex flex-column h-100">
+								{% csrf_token %}
+
+								<!-- Método de pago -->
+								<div class="mb-3">
+									<label for="method" class="form-label">Método de pago</label>
+									<select name="method" id="method" class="form-select">
+										<option value="efectivo">Efectivo</option>
+										<option value="transferencia">Transferencia</option>
+										<option value="otro">Otro</option>
+									</select>
+								</div>
+
+								<!-- Notas -->
+								<div class="mb-4">
+									<label for="notes" class="form-label">Notas (opcional)</label>
+									<textarea name="notes" id="notes" rows="3" class="form-control"></textarea>
+								</div>
+
+								<!-- Separador visual -->
+								<hr class="my-4" />
+
+								<!-- Botones -->
+								<div class="mt-auto">
+									<div class="d-grid gap-3">
+										{% bootstrap_button 'Confirmar pago' button_type='submit' button_class='btn-success btn-lg w-100' %}
+
+										<a href="{% url 'registro:carrito' registro.id %}" class="btn btn-outline-secondary w-100">
+											<i class="bi bi-arrow-left"></i>
+											Volver al carrito
+										</a>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

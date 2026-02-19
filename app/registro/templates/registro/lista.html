@@ -51,6 +51,7 @@
 								<th>Especie</th>
 								<th>Género</th>
 								{% if request.user.is_authenticated %}
+									<th>Pago</th>
 									<th>Ver Ficha</th>
 									<th>Imprimir ficha</th>
 								{% endif %}
@@ -75,6 +76,14 @@
 										{% include 'registro/genero.html' with sexo=registro.sexo get_sexo_display=registro.get_sexo_display %}
 									</td>
 									{% if request.user.is_authenticated %}
+										<td>
+											{% if registro.tiempo_pago %}
+												<span class="badge bg-primary">Pagado</span>
+											{% else %}
+												{% url 'registro:carrito' registro.id as url_pago_preview %}
+												{% bootstrap_button '<i class="bi bi-wallet2"></i> Pago Servicios' button_type='link' href=url_pago_preview size='sm' button_class='btn-success' %}
+											{% endif %}
+										</td>
 										<td>
 											{% url 'registro:ver_ficha' registro.inscripcion.campana.id registro.id as url_ficha %}
 											{% bootstrap_button '<i class="bi bi-eye"></i> Ver Ficha' button_type='link' href=url_ficha size='sm' button_class='btn-success' %}
