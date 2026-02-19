@@ -1,19 +1,26 @@
 from django.contrib import admin
 
-from .models import Campana, ItemCampana
+from .models import Campana, ProductoCampana, ServicioCampana
 
 
-class ItemCampanaInline(admin.TabularInline):
-    model = ItemCampana
-    extra = 1  # Shows one empty row for adding items
-    fields = ("producto", "costo", "precio_publico")  # Layout in the table
+class ProductoCampanaInline(admin.TabularInline):
+    model = ProductoCampana
+    extra = 1
+    verbose_name = "Producto en campaña"
+    verbose_name_plural = "Productos en campaña"
 
 
-# Register your models here.
+class ServicioCampanaInline(admin.TabularInline):
+    model = ServicioCampana
+    extra = 1
+    verbose_name = "Servicio en campaña"
+    verbose_name_plural = "Servicios en campaña"
+
+
 @admin.register(Campana)
 class CampanaAdmin(admin.ModelAdmin):
     list_display = ["nombre", "fecha", "barrio", "parroquia"]
     list_filter = ["barrio", "parroquia"]
     ordering = ["fecha"]
     show_facets = admin.ShowFacets.ALWAYS
-    inlines = [ItemCampanaInline]
+    inlines = [ServicioCampanaInline, ProductoCampanaInline]

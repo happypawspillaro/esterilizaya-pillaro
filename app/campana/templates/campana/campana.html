@@ -1,70 +1,74 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
 {% block title %}
-  Todas las campañas
+	Todas las campañas
 {% endblock %}
 {% block breadcrumb %}
-  {% include 'campana/breadcrumb.html' %}
+	{% include 'campana/breadcrumb.html' %}
 {% endblock %}
 {% block content %}
-  <h3>Datos Campaña</h3>
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <span class="badge {% if campana.estado == 'AC' %}
+	<h3>Datos Campaña</h3>
+	<ul class="list-group list-group-flush">
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<span class="badge {% if campana.estado == 'AC' %}
            text-bg-success
-        {% else %}
+				{% else %}
            text-bg-warning
-        {% endif %}">
-        {{ campana.get_estado_display }}
-      </span>
-      {{ campana.nombre }}
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <strong>Parroquia:</strong> {{ campana.get_parroquia_display }}
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <strong>Barrio:</strong> {{ campana.barrio }}
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <strong>Fecha:</strong> {{ campana.fecha }}
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <strong>Nº animales:</strong> {{ campana.n_animales }}
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <i>Creado por:</i> {{ campana.usuario }}
-    </li>
-    {% if request.user.is_authenticated %}
-      {% if campana.estado == 'AC' %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          {% url 'inscripcion:create' campana.id as url_inscripcion %}
-          {% bootstrap_button 'Nueva Inscripción' button_type='link' button_class='btn-success' href=url_inscripcion %}
-        </li>
-      {% endif %}
-    {% endif %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      {% url 'inscripcion:index' campana.id as url_registro %}
-      {% bootstrap_button 'Nueva Registro' button_type='link' button_class='btn-primary' href=url_registro %}
-      <span class="badge bg-primary rounded-pill">{{ n_inscritos }}</span>
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'registro:lista' campana.id %}">Todos los registros</a>
-      <span class="badge bg-success rounded-pill">{{ n_registrados }}</span>
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <p class="fst-italic">Click para visualizar</p>
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <div class="btn-group" role="group" aria-label="Botones Extras">
-        {% url 'registro:vista_veterinarios' campana.id as url_vet %}
-        {% bootstrap_button '👩🏻‍⚕️Vista Veterinarios🐕‍🦺' button_type='link' href=url_vet button_class='btn-outline-success' %}
-        {% if request.user.is_authenticated %}
-          {% url 'registro:ver_certificados' campana.id as url_certs %}
-          {% url 'registro:ver_recetas' campana.id as url_rects %}
-          {% bootstrap_button 'Certificados' button_type='link' href=url_certs button_class='btn-outline-success' %}
-          {% bootstrap_button 'Recetas' button_type='link' href=url_rects button_class='btn-outline-success' %}
-        {% endif %}
-      </div>
-    </li>
-  </ul>
+				{% endif %}">
+				{{ campana.get_estado_display }}
+			</span>
+			{{ campana.nombre }}
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<strong>Parroquia:</strong> {{ campana.get_parroquia_display }}
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<strong>Barrio:</strong> {{ campana.barrio }}
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<strong>Fecha:</strong> {{ campana.fecha }}
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<strong>Nº animales:</strong> {{ campana.n_animales }}
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<i>Creado por:</i> {{ campana.usuario }}
+		</li>
+		{% if request.user.is_authenticated %}
+			{% if campana.estado == 'AC' %}
+				<li class="list-group-item d-flex justify-content-between align-items-center">
+					{% url 'inscripcion:create' campana.id as url_inscripcion %}
+					{% bootstrap_button 'Nueva Inscripción' button_type='link' button_class='btn-success' href=url_inscripcion %}
+				</li>
+			{% endif %}
+		{% endif %}
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			{% url 'inscripcion:index' campana.id as url_registro %}
+			{% bootstrap_button 'Nueva Registro' button_type='link' button_class='btn-primary' href=url_registro %}
+			<span class="badge bg-primary rounded-pill">{{ n_inscritos }}</span>
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<a href="{% url 'registro:lista' campana.id %}">Todos los registros</a>
+			<span class="badge bg-success rounded-pill">{{ n_registrados }}</span>
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<p class="fst-italic">Click para visualizar</p>
+		</li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			<div class="btn-group" role="group" aria-label="Botones Extras">
+				{% url 'registro:vista_veterinarios' campana.id as url_vet %}
+				{% bootstrap_button '👩🏻‍⚕️Vista Veterinarios🐕‍🦺' button_type='link' href=url_vet button_class='btn-outline-success' %}
+				{% if request.user.is_authenticated %}
+					{% url 'registro:ver_certificados' campana.id as url_certs %}
+					{% url 'registro:ver_recetas' campana.id as url_rects %}
+					{% bootstrap_button 'Certificados' button_type='link' href=url_certs button_class='btn-outline-success' %}
+					{% bootstrap_button 'Recetas' button_type='link' href=url_rects button_class='btn-outline-success' %}
+					{% if user.is_staff %}
+						{% url 'campana:reporte_financiero_campana' campana.id as url_reporte %}
+						{% bootstrap_button '<i class="bi bi-file-earmark-bar-graph"></i> Reporte' button_type='link' href=url_reporte button_class='btn-outline-success' %}
+					{% endif %}
+				{% endif %}
+			</div>
+		</li>
+	</ul>
 {% endblock %}
