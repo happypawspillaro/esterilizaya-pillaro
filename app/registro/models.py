@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 
+from campana.models import Producto, Servicio
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -38,6 +40,10 @@ def obtener_url_unico(instance, filename):
 
 class Registro(models.Model):
     class Meta:
+        unique_together = ("inscripcion", "numero_turno")
+        verbose_name = "Registro"
+        verbose_name_plural = "Registros"
+
         ordering = ["numero_turno"]
         indexes = [
             models.Index(fields=["-fecha_registro"]),
@@ -104,6 +110,7 @@ class Registro(models.Model):
 
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="registro")
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    tiempo_pago = models.DateTimeField(null=True, blank=True, verbose_name="Momento del pago")
 
     def __str__(self) -> str:
         return f"{self.nombre} de {self.nombres_tutor}"
@@ -113,3 +120,36 @@ class Registro(models.Model):
             "registro:ver",
             args=[self.id],
         )
+
+
+class ItemRegistro(models.Model):
+    """Línea de detalle de un registro (productos/servicios añadidos)."""
+
+    registro = models.ForeignKey(Registro, on_delete=models.CASCADE, related_name="items")
+    producto = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Producto")
+    servicio = models.ForeignKey(Servicio, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Servicio")
+    descripcion = models.CharField(max_length=200, blank=True)
+    cantidad = models.PositiveIntegerField(default=1)
+    costo_unitario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo para la organización")
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio público")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Item del registro"
+        verbose_name_plural = "Items del registro"
+
+    def __str__(self) -> str:
+        if self.producto:
+            return f"{self.producto.nombre} x {self.cantidad} - {self.registro.nombre}"
+        elif self.servicio:
+            return f"{self.servicio.nombre} - {self.registro.nombre}"
+        else:
+            return f"{self.descripcion} - {self.registro.nombre}"
+
+    @property
+    def total_price(self) -> Decimal:
+        return self.cantidad * self.precio_unitario
+
+    @property
+    def total_cost(self) -> Decimal:
+        return self.cantidad * self.costo_unitario

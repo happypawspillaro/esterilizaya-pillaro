@@ -1,5 +1,6 @@
 import logging
 
+from campana.models import ProductoCampana
 from django import forms
 
 from .models import Registro
@@ -12,7 +13,7 @@ class RegistroForm(forms.ModelForm):
 
     class Meta:
         model = Registro
-        exclude = ["inscripcion", "usuario"]
+        exclude = ["inscripcion", "usuario", "tiempo_pago"]
 
     def __init__(self, *args, **kwargs):
         self.inscripcion_campana_id = kwargs.pop("inscripcion_campana_id", None)
@@ -35,3 +36,46 @@ class RegistroForm(forms.ModelForm):
                 f"El turno {numero_turno} ya ha sido asignado a otro tutor, agregue el turno correcto."
             )
         return numero_turno
+
+
+class AnadirMedicinaForma(forms.Form):
+    producto_campana = forms.ModelChoiceField(
+        queryset=ProductoCampana.objects.none(),
+        label="Medicina",
+        empty_label="Seleccione una medicina",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    cantidad = forms.IntegerField(
+        label="Cantidad",
+        min_value=1,
+        initial=1,
+        widget=forms.NumberInput(attrs={"class": "form-control", "style": "width: 80px;"}),
+    )
+
+    def __init__(self, campana, especie, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["producto_campana"].queryset = ProductoCampana.objects.filter(
+            campana=campana,
+        ).select_related("producto")
+        if especie == "🐕":
+            self.fields["cantidad"].initial = 4
+        elif especie == "🐈":
+            self.fields["cantidad"].initial = 1
+
+
+class AnadirFormaExtraVeterinario(forms.Form):
+    descripcion = forms.CharField(
+        max_length=200, label="Descripción", widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+    precio = forms.DecimalField(
+        max_digits=10, decimal_places=2, label="Precio", widget=forms.NumberInput(attrs={"class": "form-control"})
+    )
+
+
+class FormaOtroOrganizacion(forms.Form):
+    descripcion = forms.CharField(
+        max_length=200, label="Descripción", widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+    precio = forms.DecimalField(
+        max_digits=10, decimal_places=2, label="Precio", widget=forms.NumberInput(attrs={"class": "form-control"})
+    )
