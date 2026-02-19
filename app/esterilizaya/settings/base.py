@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "registro.apps.RegistroConfig",
     "reportes.apps.ReportesConfig",
     "mascotas.apps.MascotasConfig",
+    "pago.apps.PagoConfig",
     "django_bootstrap5",
     "django.contrib.admin",
     "django.contrib.auth",
