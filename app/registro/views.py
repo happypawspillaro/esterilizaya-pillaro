@@ -144,6 +144,8 @@ def ver_recetas(request, campana_id):
 
 
 class RegistradoListView(ListView):
+    """Vista para mostrar los registros ingresados que no han salido a los veterinarios en la campaña."""
+
     model = Registro
     template_name = "registro/vista_veterinarios.html"
     context_object_name = "registros"
@@ -153,16 +155,18 @@ class RegistradoListView(ListView):
         Filtrar mascotas para el parametro dado campana_id.
         """
         campana_id = self.kwargs.get("campana_id")  # Obtener campana_id del URL kwargs
-        return Registro.objects.filter(inscripcion__campana=campana_id)  # Filtrar mascotas de la campana dada
+        return Registro.objects.filter(inscripcion__campana=campana_id).filter(tiempo_pago__isnull=True)
 
     def get(self, request, *args, **kwargs):
         """
-        Handles AJAX requests to dynamically update the table.
+        Gestiona AJAX request para dinámicamente actualizar la tabla.
         """
         campana_id = self.kwargs.get("campana_id")
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":  # Check for Ajax requests
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":  # Revisar si hay requests via AJAX
             registros = list(
-                Registro.objects.filter(inscripcion__campana=campana_id).values(
+                Registro.objects.filter(inscripcion__campana=campana_id)
+                .filter(tiempo_pago__isnull=True)
+                .values(
                     "foto",
                     "especie",
                     "peso",
