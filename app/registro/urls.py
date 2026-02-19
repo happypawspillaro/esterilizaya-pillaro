@@ -19,4 +19,19 @@ urlpatterns = [
         views.ver_mascota,
         name="ver",
     ),
+    path("carrito/<int:registro_id>/", views.vista_carrito, name="carrito"),
+    path(
+        "carrito/<int:registro_id>/actualizar_esterilizacion/",
+        views.htmx_actualizar_esterilizacion,
+        name="htmx_actualizar_esterilizacion",
+    ),
+    path(
+        "carrito/<int:registro_id>/actualizar_cantidad/<int:item_id>/",
+        views.htmx_actualizar_cantidad,
+        name="htmx_actualizar_cantidad",
+    ),
+    path("carrito/<int:registro_id>/anadir_item/", views.htmx_anadir_item, name="htmx_anadir_item"),
+    path("carrito/<int:registro_id>/remover_item/<int:item_id>/", views.htmx_remover_item, name="htmx_remover_item"),
+    path("carrito/<int:registro_id>/total/", views.htmx_total_carrito, name="htmx_total_carrito"),
+    path("confirmar/<int:registro_id>/", views.confirmar_pago, name="confirmar_pago"),
 ]
