@@ -119,3 +119,66 @@ RAZON_TENENCIA = [
 ]
 
 RUTA_PDFS = pathlib.Path("/tmp/pdfs")
+
+TIPO_MEDICINA_CATEGORIAS = [
+    ("ANA", "Analgésico"),
+    ("ANTB", "Antibiótico"),
+    ("ANTI", "Antiinflamatorio"),
+    ("OTRO", "Otro"),
+]
+
+CATEGORIA_SERVICIO = [("EST", "Esterilización")]
+
+# Items por defecto a crear en cada campaña
+ITEMS_DEFECTO = {
+    # Servicio de esterilización
+    "SERVICIOS": [
+        {
+            "nombre": "Servicio de Esterilización",
+            "descripcion": "Por Veterinaria AnimalZoo",
+            "categoria": "EST",
+            "default_costo_veterinario": 8.50,
+            "default_precio_publico": 15.00,
+        }
+    ],
+    # Medicamentos caninos
+    "PRODUCTOS": [
+        {
+            "nombre": "Analgésico Canino 10kg",
+            "descripcion": "",
+            "especie_objetivo": "🐕",
+            "tipo_medicina": "ANA",
+            "peso_recomendado": 10,
+            "default_precio_compra": 0.8,
+            "default_precio_venta": 1.00,
+        },
+        {
+            "nombre": "Analgésico Canino 20kg",
+            "descripcion": "",
+            "especie_objetivo": "🐕",
+            "tipo_medicina": "ANA",
+            "peso_recomendado": 20,
+            "default_precio_compra": 1.0,
+            "default_precio_venta": 1.25,
+        },
+        {
+            "nombre": "Antibiótico",
+            "descripcion": "",
+            "especie_objetivo": "🐕",
+            "tipo_medicina": "ANTB",
+            "peso_recomendado": 10,
+            "default_precio_compra": 0.8,
+            "default_precio_venta": 1.0,
+        },
+        # Medicamentos felinos
+        {
+            "nombre": "Gotero Analgésico Felino",
+            "descripcion": "",
+            "especie_objetivo": "🐈",
+            "tipo_medicina": "ANA",
+            "peso_recomendado": 3,
+            "default_precio_compra": 3.5,
+            "default_precio_venta": 3.8,
+        },
+    ],
+}
