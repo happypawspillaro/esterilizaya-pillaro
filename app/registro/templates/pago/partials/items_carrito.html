@@ -11,7 +11,7 @@
 							{% csrf_token %}
 							<div class="input-group input-group-sm" style="max-width: 150px;">
 								<span class="input-group-text">$</span>
-								<input type="number" step="0.01" class="form-control" name="sterilization_price" value="{{ item.precio_unitario }}" required />
+								<input type="number" step="0.01" class="form-control" name="precio_esterilizacion" value="{{ item.precio_unitario }}" required />
 								<button class="btn btn-outline-primary" type="submit"><i class="bi bi-arrow-repeat"></i></button>
 							</div>
 						</form>
@@ -33,24 +33,24 @@
                     <div class="mt-2">
                         <span class="me-2"><i class="bi bi-hash"></i> Cantidad:</span>
                         <div class="btn-group" role="group">
-                            <button class="btn btn-sm btn-outline-secondary"
-                                    hx-post="{% url 'registro:htmx_actualizar_cantidad' registro.id item.id %}"
-                                    hx-vals='{"cantidad": {{ item.cantidad|add:"-1" }} }'
-                                    hx-target="#cart-items-container"
-                                    hx-swap="innerHTML"
-                                    {% if item.cantidad <= 1 %}disabled{% endif %}>
-                                <i class="bi bi-dash"></i>
-                            </button>
+							<button class="btn btn-sm btn-outline-secondary"
+									hx-post="{% url 'registro:htmx_actualizar_cantidad' registro.id item.id %}"
+									hx-vals="{&quot;cantidad&quot;: {{ item.cantidad|add:-1 }} }"
+									hx-target="#cart-items-container"
+									hx-swap="innerHTML"
+									{% if item.cantidad <= 1 %}disabled{% endif %}>
+								<i class="bi bi-dash"></i>
+							</button>
                             <span class="btn btn-sm btn-outline-secondary disabled" style="min-width: 40px;">
                                 {{ item.cantidad }}
                             </span>
-                            <button class="btn btn-sm btn-outline-secondary"
-                                    hx-post="{% url 'registro:htmx_actualizar_cantidad' registro.id item.id %}"
-                                    hx-vals='{"cantidad": {{ item.cantidad|add:"1" }} }'
-                                    hx-target="#cart-items-container"
-                                    hx-swap="innerHTML">
-                                <i class="bi bi-plus"></i>
-                            </button>
+							<button class="btn btn-sm btn-outline-secondary"
+									hx-post="{% url 'registro:htmx_actualizar_cantidad' registro.id item.id %}"
+									hx-vals="{&quot;cantidad&quot;: {{ item.cantidad|add:1 }} }"
+									hx-target="#cart-items-container"
+									hx-swap="innerHTML">
+								<i class="bi bi-plus"></i>
+							</button>
                         </div>
                     </div>
 				{% elif '[Extra]' in item.descripcion %}

@@ -14,8 +14,8 @@
 			border-radius: 8px;
 			background-color: #f8f9fa;
 		}
-		.sterilization-form,
-		.quantity-form {
+		.forma-esterilizacion,
+		.forma-cantidad{
 			display: inline-block;
 			margin-left: 10px;
 		}
@@ -24,20 +24,20 @@
 			font-weight: bold;
 			color: #198754;
 		}
-		.add-section {
+		.anadir-seccion {
 			margin-top: 30px;
 			border-top: 2px solid #0d6efd;
 			padding-top: 20px;
 		}
-		.add-form {
+		.anadir-forma {
 			background: #e9ecef;
 			padding: 20px;
 			border-radius: 8px;
 			margin-bottom: 20px;
 		}
 		@media (max-width: 768px) {
-			.sterilization-form,
-			.quantity-form {
+			.forma-esterilizacion,
+			.forma-cantidad{
 				display: block;
 				margin-top: 10px;
 				margin-left: 0;
@@ -94,34 +94,34 @@
 			<div id="cart-total" class="total" hx-get="{% url 'registro:htmx_total_carrito' registro.id %}" hx-trigger="load, itemUpdated from:body" hx-target="this">Cargando...</div>
 		</div>
 
-		<div class="add-section">
+		<div class="anadir-seccion">
 			<h2 class="h4 mb-3"><i class="bi bi-plus-circle"></i> Añadir items</h2>
 
-			<div class="add-form">
+			<div class="anadir-forma">
 				<h3 class="h5"><i class="bi bi-capsule"></i> Medicina</h3>
 				<form hx-post="{% url 'registro:htmx_anadir_item' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
 					{% csrf_token %}
-					<input type="hidden" name="item_type" value="medicina" />
+					<input type="hidden" name="tipo_item" value="medicina" />
 					{% bootstrap_form forma_medicina layout='horizontal' %}
 					{% bootstrap_button 'Añadir medicina' button_type='submit' button_class='btn-primary' %}
 				</form>
 			</div>
 
-			<div class="add-form">
+			<div class="anadir-forma">
 				<h3 class="h5"><i class="bi bi-plus-circle-dotted"></i> Extra Veterinario</h3>
 				<form hx-post="{% url 'registro:htmx_anadir_item' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
 					{% csrf_token %}
-					<input type="hidden" name="item_type" value="extra" />
+					<input type="hidden" name="tipo_item" value="extra" />
 					{% bootstrap_form forma_extra layout='horizontal' %}
 					{% bootstrap_button 'Añadir extra' button_type='submit' button_class='btn-primary' %}
 				</form>
 			</div>
 
-			<div class="add-form">
+			<div class="anadir-forma">
 				<h3 class="h5"><i class="bi bi-plus-square-fill"></i> Otro</h3>
 				<form hx-post="{% url 'registro:htmx_anadir_item' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
 					{% csrf_token %}
-					<input type="hidden" name="item_type" value="otro" />
+					<input type="hidden" name="tipo_item" value="otro" />
 					{% bootstrap_form forma_otra layout='horizontal' %}
 					{% bootstrap_button 'Añadir otro' button_type='submit' button_class='btn-primary' %}
 				</form>
