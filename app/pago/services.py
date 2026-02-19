@@ -24,6 +24,7 @@ def registrar_pago(
                 descripcion=item.descripcion,
                 precio=item.precio_unitario,
                 costo_veterinario=item.costo_unitario,
+                usuario=usuario,
             )
         elif item.producto:
             # Producto (medicina)
@@ -34,21 +35,31 @@ def registrar_pago(
                 cantidad=item.cantidad,
                 precio_unitario=item.precio_unitario,
                 costo_unitario=item.costo_unitario,
+                usuario=usuario,
             )
         elif "[Extra]" in item.descripcion:
             # Extra veterinario (solo precio)
             PagoExtra.objects.create(
-                pago=pago, descripcion=item.descripcion.replace("[Extra] ", ""), precio=item.precio_unitario
+                pago=pago,
+                descripcion=item.descripcion.replace("[Extra] ", ""),
+                precio=item.precio_unitario,
+                usuario=usuario,
             )
         elif "[Otro]" in item.descripcion:
             # Otro (solo precio)
             PagoOtro.objects.create(
-                pago=pago, descripcion=item.descripcion.replace("[Otro] ", ""), precio=item.precio_unitario
+                pago=pago,
+                descripcion=item.descripcion.replace("[Otro] ", ""),
+                precio=item.precio_unitario,
+                usuario=usuario,
             )
         else:
             # Fallback: si no coincide, lo guardamos como otro
             PagoOtro.objects.create(
-                pago=pago, descripcion=item.descripcion or "Item sin clasificar", precio=item.precio_unitario
+                pago=pago,
+                descripcion=item.descripcion or "Item sin clasificar",
+                precio=item.precio_unitario,
+                usuario=usuario,
             )
 
     registro.tiempo_pago = timezone.now()

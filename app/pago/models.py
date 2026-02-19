@@ -42,6 +42,9 @@ class PagoServicio(models.Model):
     descripcion = models.CharField(max_length=200, blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio público")
     costo_veterinario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo veterinario")
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuario que facturó"
+    )
 
     class Meta:
         verbose_name = "Servicio en pago"
@@ -60,6 +63,9 @@ class PagoProducto(models.Model):
     cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio público unitario")
     costo_unitario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo unitario")
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuario que facturó"
+    )
 
     class Meta:
         verbose_name = "Producto en pago"
@@ -75,6 +81,9 @@ class PagoExtra(models.Model):
     pago = models.ForeignKey(Pago, on_delete=models.CASCADE, related_name="extras")
     descripcion = models.CharField(max_length=200)
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio público")
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuario que facturó"
+    )
 
     class Meta:
         verbose_name = "Extra en pago"
@@ -90,6 +99,9 @@ class PagoOtro(models.Model):
     pago = models.ForeignKey(Pago, on_delete=models.CASCADE, related_name="otros")
     descripcion = models.CharField(max_length=200)
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio público")
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuario que facturó"
+    )
 
     class Meta:
         verbose_name = "Otro en pago"
