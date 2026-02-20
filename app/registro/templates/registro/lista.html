@@ -67,7 +67,7 @@
 									{% if request.user.is_authenticated %}
 										<td>
 											{% if registro.tiempo_pago %}
-												<span class="badge bg-success">Pagado</span>
+												<span class="badge border border-success text-success">Pagado</span>
 											{% else %}
 												{% url 'registro:carrito' registro.id as url_pago_preview %}
 												{% bootstrap_button '<i class="bi bi-wallet2"></i> Pagar' button_type='link' href=url_pago_preview size='sm' button_class='btn-success' %}
