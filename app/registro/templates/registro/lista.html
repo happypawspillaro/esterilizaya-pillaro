@@ -47,14 +47,16 @@
 								<th>Turno</th>
 								{% if request.user.is_authenticated %}
 									<th>Pago</th>
-									<th>Ver Ficha</th>
-									<th>Imprimir ficha</th>
 								{% endif %}
 								<th>Nombre Mascota</th>
 								<th>Foto</th>
 								<th>Nombre Tutor</th>
 								<th>Especie</th>
 								<th>Género</th>
+								{% if request.user.is_authenticated %}
+									<th>Ver Ficha</th>
+									<th>Imprimir ficha</th>
+								{% endif %}
 							</tr>
 						</thead>
 						<tbody>
@@ -73,14 +75,6 @@
 												{% bootstrap_button '<i class="bi bi-wallet2"></i> Pagar' button_type='link' href=url_pago_preview size='sm' button_class='btn-success' %}
 											{% endif %}
 										</td>
-										<td>
-											{% url 'registro:ver_ficha' registro.inscripcion.campana.id registro.id as url_ficha %}
-											{% bootstrap_button '<i class="bi bi-eye"></i> Ver' button_type='link' href=url_ficha size='sm' button_class='btn-info' %}
-										</td>
-										<td>
-											{% url 'registro:generar_pdf' registro.id as url_imprimir %}
-											{% bootstrap_button '<i class="bi bi-printer"></i> Imprimir' button_type='link' href=url_imprimir size='sm' %}
-										</td>
 									{% endif %}
 									<td>
 										<a href="{{ registro.get_absolute_url }}">{{ registro.nombre }}</a>
@@ -93,6 +87,16 @@
 									<td>
 										{% include 'registro/genero.html' with sexo=registro.sexo get_sexo_display=registro.get_sexo_display %}
 									</td>
+									{% if request.user.is_authenticated %}
+										<td>
+											{% url 'registro:ver_ficha' registro.inscripcion.campana.id registro.id as url_ficha %}
+											{% bootstrap_button '<i class="bi bi-eye"></i> Ver' button_type='link' href=url_ficha size='sm' button_class='btn-info' %}
+										</td>
+										<td>
+											{% url 'registro:generar_pdf' registro.id as url_imprimir %}
+											{% bootstrap_button '<i class="bi bi-printer"></i> Imprimir' button_type='link' href=url_imprimir size='sm' %}
+										</td>
+									{% endif %}
 								</tr>
 							{% endfor %}
 						</tbody>
