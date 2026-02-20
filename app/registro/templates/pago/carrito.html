@@ -7,7 +7,7 @@
 
 {% block extra_head %}
 	<style>
-		.item-row {
+		.fila-item {
 			margin: 10px 0;
 			padding: 15px;
 			border: 1px solid #dee2e6;
@@ -15,7 +15,7 @@
 			background-color: #f8f9fa;
 		}
 		.forma-esterilizacion,
-		.forma-cantidad{
+		.forma-cantidad {
 			display: inline-block;
 			margin-left: 10px;
 		}
@@ -35,9 +35,42 @@
 			border-radius: 8px;
 			margin-bottom: 20px;
 		}
+		/* Mejoras para inputs en móviles */
+		input[type="number"],
+		input[type="text"],
+		select.form-select,
+		textarea.form-control {
+			font-size: 16px;
+			background-color: #ffffff !important;
+			color: #212529 !important;
+			border: 1px solid #ced4da;
+			border-radius: 0.25rem;
+			padding: 0.5rem 0.75rem;
+			-webkit-appearance: none;
+			appearance: none;
+		}
+		input[type="number"]:focus,
+		input[type="text"]:focus,
+		select.form-select:focus,
+		textarea.form-control:focus {
+			border-color: #80bdff;
+			box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+			outline: none;
+		}
+		.input-group.input-group-sm {
+			max-width: 100%;
+		}
+		.btn-group .btn {
+			background-color: #ffffff;
+			border-color: #ced4da;
+			color: #212529;
+		}
+		.btn-group .btn:hover {
+			background-color: #e2e6ea;
+		}
 		@media (max-width: 768px) {
 			.forma-esterilizacion,
-			.forma-cantidad{
+			.forma-cantidad {
 				display: block;
 				margin-top: 10px;
 				margin-left: 0;
@@ -46,22 +79,16 @@
 				margin-top: 5px;
 			}
 			.form-select,
-			.form-control {
-				font-size: 0.9rem;
+			.form-control,
+			.input-group-text {
+				font-size: 0.95rem;
 			}
 			.btn {
-				font-size: 0.9rem;
-				padding: 8px;
+				font-size: 0.95rem;
+				padding: 8px 12px;
 			}
-		}
-		@media (min-width: 769px) and (max-width: 992px) {
-			.form-select,
-			.form-control {
-				font-size: 1rem;
-			}
-			.btn {
-				font-size: 1rem;
-				padding: 10px;
+			.total {
+				font-size: 1.3rem;
 			}
 		}
 	</style>
@@ -78,9 +105,12 @@
 			<i class="bi bi-info-circle"></i>
 			<strong>Campaña:</strong> {{ registro.inscripcion.campana.nombre }} |
 			<strong>Especie:</strong> {{ registro.get_especie_display }} {{ registro.especie }} |
-			<strong>Peso:</strong> {{ registro.peso|default:'No registrado' }} kg{% if registro.vulnerable %}
-				|
-				<strong>Vulnerable:</strong>
+			<strong>Peso:</strong> {{ registro.peso|default:'No registrado' }} kg 
+			{% if registro.observaciones %}
+				|</br><strong>Observaciones:</strong> {{ registro.observaciones }}
+			{% endif %}
+			{% if registro.vulnerable %}
+				|</br><strong>Vulnerable:</strong>
 				✅
 			{% endif %}
 		</div>
@@ -148,12 +178,6 @@
 		document.body.addEventListener("htmx:configRequest", function (evt) {
 			evt.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
 		});
-		// Disparar evento para actualizar el total después de cada modificación del carrito
-		document.body.addEventListener("htmx:afterRequest", function (evt) {
-			if (evt.detail.target && evt.detail.target.id === "cart-items-container") {
-				htmx.trigger("#cart-total", "itemUpdated");
-			}
-		});
 		
 		// Limpiar formularios después de añadir un item exitosamente
 		document.body.addEventListener("htmx:afterRequest", function (evt) {
@@ -180,11 +204,6 @@
 					});
 				}
 			}
-		});
-		
-		// Manejar CSRF para peticiones DELETE (HTMX lo incluye automáticamente si está en cookie)
-		document.body.addEventListener("htmx:configRequest", function (evt) {
-			evt.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
 		});
 	</script>
 {% endblock %}
