@@ -67,8 +67,12 @@ class Registro(models.Model):
     # Datos específicos
     especie = models.CharField(choices=ESPECIE, max_length=1, help_text="Especie mascota a esterilizar")
     sexo = models.CharField(choices=SEXO, max_length=2, help_text="Género mascota a esterilizar")
-    edad_anos = models.PositiveSmallIntegerField(choices=EDADES_ANOS, default=0, help_text="Edad aproximada en años")
-    edad_meses = models.PositiveSmallIntegerField(choices=EDADES_MESES, default=6, help_text="Edad aproximada en meses")
+    edad_anos = models.PositiveSmallIntegerField(
+        choices=EDADES_ANOS, default=0, verbose_name="Edad Años", help_text="Edad aproximada en años"
+    )
+    edad_meses = models.PositiveSmallIntegerField(
+        choices=EDADES_MESES, default=6, verbose_name="Edad Meses", help_text="Edad aproximada en meses"
+    )
     raza_mascota = models.CharField(max_length=65, help_text="Raza mascota, en caso de cruces poner Raza1/Raza2")
     carnet = models.CharField(
         choices=AFIRMATIVO_NEGATIVO,
