@@ -67,7 +67,7 @@
 								<th>Total</th>
 								<th>Método</th>
 								<th>Nota</th>
-								<th>Usuario</th>
+								<th>Recaudador</th>
 							</tr>
 						</thead>
 
@@ -153,6 +153,51 @@
 								</tr>
 							{% endfor %}
 						</tbody>
+						<tfoot class="table-light fw-bold">
+							<tr>
+								<td colspan="11" class="text-end">TOTALES:</td>
+
+								<!-- SERVICIO -->
+								<td class="bg-info-subtle">${{ totales.servicio }}</td>
+
+								<!-- PRODUCTOS -->
+								{% for item in items %}
+									{% with cantidad=totales.productos|get_item:item %}
+										<td class="bg-warning-subtle">
+											{% if cantidad %}
+												{{ cantidad }}
+											{% endif %}
+										</td>
+									{% endwith %}
+								{% endfor %}
+								<!-- EXTRAS -->
+								<td class="bg-success-subtle">
+									{% if totales.extras %}
+										${{ totales.extras }}
+									{% endif %}
+								</td>
+								<!-- OTROS -->
+								<td class="bg-secondary-subtle">
+									{% if totales.otros %}
+										${{ totales.otros }}
+									{% endif %}
+								</td>
+								<!-- TOTAL -->
+								<td class="fw-bold">
+									{% if totales.ingresos %}
+										${{ totales.ingresos }}
+									{% endif %}
+								</td>
+								<!-- Método -->
+								<td></td>
+
+								<!-- Nota -->
+								<td></td>
+
+								<!-- Usuario -->
+								<td></td>
+							</tr>
+						</tfoot>
 					</table>
 				</div>
 			</div>

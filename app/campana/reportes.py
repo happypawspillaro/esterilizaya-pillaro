@@ -1,5 +1,6 @@
 # campana/reportes.py (fragmento final modificado)
 import logging
+from collections import defaultdict
 
 from campana.models import Campana, ProductoCampana
 from django.db.models import DecimalField, F, Sum, Value
@@ -185,7 +186,10 @@ def financiero_detallado(campana_id: int):
     )
 
     data_registros = []
-
+    total_servicio = 0
+    total_extras = 0
+    total_otros = 0
+    totales_productos = defaultdict(int)
     for reg in registros:
         pago = getattr(reg, "pago", None)
 
@@ -195,16 +199,22 @@ def financiero_detallado(campana_id: int):
         if pago:
             # Servicios
             servicio_total = sum(s.precio for s in pago.servicios.all())
-
+            total_servicio += servicio_total
             # Productos
             for prod in pago.productos.all():
                 nombre = prod.nombre_producto
                 productos_dict[nombre] = prod.cantidad
 
+                # Acumular cantidad vendida por producto
+                totales_productos[nombre] += prod.cantidad
+
             # Extras
             extras = list(pago.extras.all())
+            for e in extras:
+                total_extras += e.precio
             otros = list(pago.otros.all())
-
+            for o in otros:
+                total_otros += o.precio
             extra_data = (
                 {
                     "descripcion": e.descripcion,
@@ -220,7 +230,6 @@ def financiero_detallado(campana_id: int):
                 }
                 for o in otros
             )
-
             reg_data = {
                 "numero_turno": reg.numero_turno,
                 "nombres_tutor": reg.nombres_tutor,
@@ -240,15 +249,33 @@ def financiero_detallado(campana_id: int):
                     "total": pago.monto_total,
                     "metodo": pago.get_metodo_display(),
                     "nota": pago.notas,
-                    "usuario": pago.usuario
+                    "usuario": pago.usuario,
                 },
             }
 
             data_registros.append(reg_data)
     total_general = sum(r["pago"]["total"] for r in data_registros if r.get("pago"))
+    total_ingresos = (
+        total_servicio
+        + total_extras
+        + total_otros
+        + sum(
+            prod.precio_unitario * prod.cantidad
+            for reg in registros
+            for prod in getattr(reg.pago, "productos", []).all()
+        )
+    )
+    totales_productos = {k: v for k, v in totales_productos.items() if v > 0}
     return {
         "registros": data_registros,
         "items": productos_unicos,
         "campana": campana,
         "total_general": total_general,
+        "totales": {
+            "servicio": total_servicio,
+            "productos": totales_productos,
+            "extras": total_extras,
+            "otros": total_otros,
+            "ingresos": total_ingresos,
+        },
     }
