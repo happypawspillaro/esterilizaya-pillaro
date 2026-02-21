@@ -1,97 +1,365 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+
 {% block title %}
 	Reporte financiero - {{ campana.nombre }}
 {% endblock %}
+
+{% block extra_head %}
+	<style>
+		/* Estilos generales */
+		.card-header {
+			font-weight: bold;
+		}
+		.total-row {
+			font-size: 1.2rem;
+			font-weight: bold;
+			border-top: 2px solid #dee2e6;
+		}
+		/* Estilos para impresión (solo costos) */
+		@media print {
+			@page {
+				margin: 0.2in; /* Márgenes reducidos para aprovechar el ancho */
+				size: portrait; /* Orientación vertical (puede cambiarse a landscape si es necesario) */
+			}
+			body * {
+				visibility: hidden;
+			}
+			#seccion-costos,
+			#seccion-costos * {
+				visibility: visible;
+			}
+			#seccion-costos {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				background: white;
+				color: black;
+				font-size: 10pt;
+				border: none;
+				box-shadow: none;
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			.card {
+				border: 1px solid #000 !important;
+				box-shadow: none !important;
+				background: white !important;
+				margin-bottom: 4px !important;
+			}
+			.card-header {
+				background: #f0f0f0 !important;
+				color: black !important;
+				border-bottom: 1px solid #000;
+				padding: 3px 5px !important;
+				font-size: 10pt;
+			}
+			.card-body {
+				padding: 4px !important;
+			}
+			.badge,
+			.btn,
+			.no-print {
+				display: none !important;
+			}
+			table {
+				border-collapse: collapse;
+				width: 100%;
+				font-size: 9pt;
+				table-layout: fixed; /* Controla el ancho de columnas */
+			}
+			th,
+			td {
+				border: 1px solid #000;
+				padding: 2px 3px !important;
+				word-wrap: break-word;
+			}
+			th {
+				background: #f0f0f0;
+			}
+			/* Ajuste de anchos para tabla de productos */
+			th:first-child,
+			td:first-child {
+				width: 50%; /* Nombre del producto */
+			}
+			th:nth-child(2),
+			td:nth-child(2) {
+				width: 20%; /* Cantidad */
+				text-align: center;
+			}
+			th:nth-child(3),
+			td:nth-child(3) {
+				width: 30%; /* Costo total */
+				text-align: right;
+			}
+			/* Ajuste para tabla de extras/otros */
+			th:only-of-type,
+			td:only-of-type {
+				width: auto; /* Para tablas con dos columnas se ajusta automáticamente */
+			}
+			h2,
+			h3,
+			h4 {
+				margin: 3px 0;
+				page-break-after: avoid;
+			}
+			h2.h4 {
+				font-size: 12pt;
+				margin: 5px 0 3px;
+			}
+			h3.h6 {
+				font-size: 10pt;
+				margin: 0;
+			}
+			p {
+				margin: 1px 0;
+				font-size: 9pt;
+			}
+			.total-row {
+				font-size: 10pt;
+			}
+			.container {
+				width: 100%;
+				max-width: 100%;
+				padding: 0;
+				margin: 0;
+			}
+		}
+	</style>
+{% endblock %}
+
 {% block content %}
 	<div class="container mt-4">
-		<div class="d-flex justify-content-between align-items-center mb-4">
+		<div class="d-flex justify-content-between align-items-center mb-4 no-print">
 			<h1><i class="bi bi-bar-chart-line"></i> Reporte financiero</h1>
-			<a href="#" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer"></i> Imprimir</a>
+			<div>
+				<a href="#" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer"></i> Imprimir costos</a>
+				<a href="{% url 'campana:index' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Volver</a>
+			</div>
 		</div>
 
-		<div class="card shadow-sm mb-4">
-			<div class="card-header bg-primary text-white">
-				<h2 class="h5 mb-0">{{ campana.nombre }} - {{ campana.get_canton_display }} - {{ campana.get_barrio_display }} ({{ campana.fecha }})</h2>
+		<!-- Información de la campaña (visible siempre) -->
+		<div id="seccion-costos">
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-primary text-white">
+					<h2 class="h5 mb-0">{{ campana.nombre }} - {{ campana.get_canton_display }} - {{ campana.get_barrio_display }}</h2>
+				</div>
+				<div class="card-body">
+					<p>
+						<strong>Fecha:</strong> {{ campana.fecha|date:'d/m/Y' }}
+					</p>
+				</div>
 			</div>
-			<div class="card-body">
-				<div class="row text-center">
-					<div class="col-md-4">
-						<div class="p-3 border rounded">
-							<span class="text-muted">Costo total</span>
-							<h3 class="text-danger">$ {{ total_costo|floatformat:2 }}</h3>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="p-3 border rounded">
-							<span class="text-muted">Ingreso total</span>
-							<h3 class="text-success">$ {{ total_ingreso|floatformat:2 }}</h3>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="p-3 border rounded">
-							<span class="text-muted">Ganancia neta</span>
-							<h3 class="{% if ganancia >= 0 %}
-									
-									profit-positive
 
-								{% else %}
-									
-									profit-negative
+			<!-- SECCIÓN DE COSTOS (se imprime) -->
+			<h2 class="h4 mb-3">Costos</h2>
 
-								{% endif %}">
-								$ {{ ganancia|floatformat:2 }}
-							</h3>
-						</div>
-					</div>
+			<!-- Servicios (costos) -->
+			<div class="card mb-3">
+				<div class="card-header bg-secondary text-white">
+					<h3 class="h6 mb-0">Servicios</h3>
+				</div>
+				<div class="card-body">
+					<p>
+						<strong>Cantidad:</strong> {{ costos.servicios.cantidad }}
+					</p>
+					<p>
+						<strong>Costo total:</strong> $ {{ costos.servicios.total|floatformat:2 }}
+					</p>
+				</div>
+			</div>
+
+			<!-- Productos (costos) -->
+			<div class="card mb-3">
+				<div class="card-header bg-secondary text-white">
+					<h3 class="h6 mb-0">Productos</h3>
+				</div>
+				<div class="card-body">
+					<p>
+						<strong>Cantidad total de items:</strong> {{ costos.productos.cantidad }}
+					</p>
+					<p>
+						<strong>Costo total:</strong> $ {{ costos.productos.total|floatformat:2 }}
+					</p>
+					{% if costos.productos.detalle %}
+						<hr />
+						<h4 class="h6">Detalle por producto</h4>
+						<table class="table table-sm">
+							<thead>
+								<tr>
+									<th>Producto</th>
+									<th class="text-center">Cantidad</th>
+									<th class="text-end">Costo total</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for prod in costos.productos.detalle %}
+									<tr>
+										<td>{{ prod.nombre }}</td>
+										<td class="text-center">{{ prod.cantidad }}</td>
+										<td class="text-end">$ {{ prod.costo_total|floatformat:2 }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Extras (costos) -->
+			<div class="card mb-3">
+				<div class="card-header bg-secondary text-white">
+					<h3 class="h6 mb-0">Extras</h3>
+				</div>
+				<div class="card-body">
+					{% if costos.extras.detalle %}
+						<table class="table table-sm">
+							<thead>
+								<tr>
+									<th>Descripción</th>
+									<th class="text-end">Precio</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for extra in costos.extras.detalle %}
+									<tr>
+										<td>{{ extra.descripcion }}</td>
+										<td class="text-end">$ {{ extra.precio|floatformat:2 }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot>
+								<tr class="total-row">
+									<th>Total extras</th>
+									<th class="text-end">$ {{ costos.extras.total|floatformat:2 }}</th>
+								</tr>
+							</tfoot>
+						</table>
+					{% else %}
+						<p class="text-muted">No hay extras registrados.</p>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Total costos -->
+			<div class="card bg-light">
+				<div class="card-body">
+					<h3 class="h5 mb-0">Total costos: $ {{ costos.total|floatformat:2 }}</h3>
 				</div>
 			</div>
 		</div>
 
-		<div class="card shadow-sm">
-			<div class="card-header bg-secondary text-white">
-				<h3 class="h5 mb-0">Detalle por producto</h3>
-			</div>
-			<div class="card-body">
-				<div class="table-responsive">
-					<table class="table table-striped table-hover">
-						<thead>
-							<tr>
-								<th>Producto / Descripción</th>
-								<th class="text-center">Cantidad</th>
-								<th class="text-end">Costo total</th>
-								<th class="text-end">Ingreso total</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for item in detalle %}
-								<tr>
-									<td>{{ item.descripcion }}</td>
-									<td class="text-center">{{ item.cantidad }}</td>
-									<td class="text-end">$ {{ item.costo_total|floatformat:2 }}</td>
-									<td class="text-end">$ {{ item.ingreso_total|floatformat:2 }}</td>
-								</tr>
-							{% empty %}
-								<tr>
-									<td colspan="5" class="text-center text-muted">No hay ventas registradas en esta campaña.</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-						<tfoot class="table-dark">
-							<tr>
-								<th>TOTALES</th>
-								<th class="text-center">{{ detalle|length }} items</th>
-								<th class="text-end">$ {{ total_costo|floatformat:2 }}</th>
-								<th class="text-end">$ {{ total_ingreso|floatformat:2 }}</th>
-							</tr>
-						</tfoot>
-					</table>
+		<!-- SECCIÓN DE INGRESOS (no se imprime) -->
+		<div class="mt-5 no-print">
+			<h2 class="h4 mb-3">Ingresos</h2>
+
+			<!-- Servicios (ingresos) -->
+			<div class="card mb-3">
+				<div class="card-header bg-success text-white">
+					<h3 class="h6 mb-0">Servicios</h3>
+				</div>
+				<div class="card-body">
+					<p>
+						<strong>Cantidad:</strong> {{ ingresos.servicios.cantidad }}
+					</p>
+					<p>
+						<strong>Ingreso total:</strong> $ {{ ingresos.servicios.total|floatformat:2 }}
+					</p>
 				</div>
 			</div>
-		</div>
 
-		<div class="mt-4">
-			<a href="{% url 'campana:index' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Volver a campañas</a>
+			<!-- Productos (ingresos) -->
+			<div class="card mb-3">
+				<div class="card-header bg-success text-white">
+					<h3 class="h6 mb-0">Productos</h3>
+				</div>
+				<div class="card-body">
+					<p>
+						<strong>Cantidad total de items:</strong> {{ ingresos.productos.cantidad }}
+					</p>
+					<p>
+						<strong>Ingreso total:</strong> $ {{ ingresos.productos.total|floatformat:2 }}
+					</p>
+					{% if ingresos.productos.detalle %}
+						<hr />
+						<h4 class="h6">Detalle por producto</h4>
+						<table class="table table-sm">
+							<thead>
+								<tr>
+									<th>Producto</th>
+									<th class="text-center">Cantidad</th>
+									<th class="text-end">Ingreso total</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for prod in ingresos.productos.detalle %}
+									<tr>
+										<td>{{ prod.nombre }}</td>
+										<td class="text-center">{{ prod.cantidad }}</td>
+										<td class="text-end">$ {{ prod.ingreso_total|floatformat:2 }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Extras (ingresos, solo total) -->
+			<div class="card mb-3">
+				<div class="card-header bg-success text-white">
+					<h3 class="h6 mb-0">Extras</h3>
+				</div>
+				<div class="card-body">
+					<p>
+						<strong>Total:</strong> $ {{ ingresos.extras.total|floatformat:2 }}
+					</p>
+				</div>
+			</div>
+
+			<!-- Otros (ingresos) -->
+			<div class="card mb-3">
+				<div class="card-header bg-success text-white">
+					<h3 class="h6 mb-0">Otros</h3>
+				</div>
+				<div class="card-body">
+					{% if ingresos.otros.detalle %}
+						<table class="table table-sm">
+							<thead>
+								<tr>
+									<th>Descripción</th>
+									<th class="text-end">Precio</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for otro in ingresos.otros.detalle %}
+									<tr>
+										<td>{{ otro.descripcion }}</td>
+										<td class="text-end">$ {{ otro.precio|floatformat:2 }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot>
+								<tr class="total-row">
+									<th>Total otros</th>
+									<th class="text-end">$ {{ ingresos.otros.total|floatformat:2 }}</th>
+								</tr>
+							</tfoot>
+						</table>
+					{% else %}
+						<p class="text-muted">No hay otros registrados.</p>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Total ingresos -->
+			<div class="card bg-light">
+				<div class="card-body">
+					<h3 class="h5 mb-0">Total ingresos: $ {{ ingresos.total|floatformat:2 }}</h3>
+				</div>
+			</div>
 		</div>
 	</div>
 {% endblock %}
