@@ -240,6 +240,7 @@ def financiero_detallado(campana_id: int):
                     "total": pago.monto_total,
                     "metodo": pago.get_metodo_display(),
                     "nota": pago.notas,
+                    "usuario": pago.usuario
                 },
             }
 
