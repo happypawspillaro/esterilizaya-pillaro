@@ -128,6 +128,11 @@ TIPO_MEDICINA_CATEGORIAS = [
 ]
 
 CATEGORIA_SERVICIO = [("EST", "Esterilización")]
+TIPOS_PAGO = [
+    ("EFE", "Efectivo"),
+    ("TRAN", "Transferencia"),
+    ("OTRO", "Otro"),
+]
 
 # Items por defecto a crear en cada campaña
 ITEMS_DEFECTO = {

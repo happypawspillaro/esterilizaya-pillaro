@@ -1,6 +1,7 @@
 from catalogo.models import Producto, Servicio
 from django.conf import settings
 from django.db import models
+from esterilizaya.constantes import TIPOS_PAGO
 from registro.models import Registro
 
 
@@ -11,14 +12,9 @@ class Pago(models.Model):
     monto_total = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_pago = models.DateTimeField(auto_now_add=True)
     metodo = models.CharField(
-        max_length=50,
-        choices=[
-            ("efectivo", "Efectivo"),
-            ("tarjeta", "Tarjeta"),
-            ("transferencia", "Transferencia"),
-            ("otro", "Otro"),
-        ],
-        default="efectivo",
+        max_length=4,
+        choices=TIPOS_PAGO,
+        default="EFE",
     )
     notas = models.TextField(blank=True)
     usuario = models.ForeignKey(
