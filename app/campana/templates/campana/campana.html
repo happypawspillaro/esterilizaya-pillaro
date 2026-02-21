@@ -11,9 +11,13 @@
 	<ul class="list-group list-group-flush">
 		<li class="list-group-item d-flex justify-content-between align-items-center">
 			<span class="badge {% if campana.estado == 'AC' %}
+					
            text-bg-success
+
 				{% else %}
+					
            text-bg-warning
+
 				{% endif %}">
 				{{ campana.get_estado_display }}
 			</span>
@@ -64,7 +68,7 @@
 					{% bootstrap_button 'Certificados' button_type='link' href=url_certs button_class='btn-outline-success' %}
 					{% bootstrap_button 'Recetas' button_type='link' href=url_rects button_class='btn-outline-success' %}
 					{% if user.is_staff %}
-						{% url 'campana:reporte_financiero_campana' campana.id as url_reporte %}
+						{% url 'campana:reporte_financiero_resumen' campana.id as url_reporte %}
 						{% bootstrap_button '<i class="bi bi-file-earmark-bar-graph"></i> Reporte' button_type='link' href=url_reporte button_class='btn-outline-success' %}
 					{% endif %}
 				{% endif %}

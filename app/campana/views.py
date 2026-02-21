@@ -13,7 +13,7 @@ from registro.models import Registro
 
 from .forms import CampanaForm
 from .models import Campana
-from .reportes import reporte_financiero
+from .reportes import financiero_detallado, reporte_financiero
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +77,12 @@ def listar_canton_parroquia(request):
 
 
 @staff_member_required  # Solo personal autorizado
-def reporte_financiero_campana(request, campana_id):
+def reporte_financiero_resumen(request, campana_id):
     report_data = reporte_financiero(campana_id)
     return render(request, "campana/reporte_financiero.html", report_data)
+
+
+@staff_member_required  # Solo personal autorizado
+def reporte_financiero_detallado(request, campana_id):
+    registro_data = financiero_detallado(campana_id)
+    return render(request, "campana/reporte_financiero_detallado.html", registro_data)

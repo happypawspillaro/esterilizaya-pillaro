@@ -1,24 +1,28 @@
 # campana/reportes.py (fragmento final modificado)
 import logging
-from decimal import Decimal
 
+from campana.models import Campana, ProductoCampana
 from django.db.models import DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 from pago.models import Pago, PagoExtra, PagoOtro, PagoProducto, PagoServicio
-
-from .models import Campana
+from registro.models import Registro
 
 logger = logging.getLogger(__name__)
 
 
-def reporte_financiero(campana_id: int) -> dict:
-    campana = Campana.objects.get(id=campana_id)
-
+def devolver_extras(campana: Campana):
     servicios = PagoServicio.objects.filter(pago__registro__inscripcion__campana=campana)
     productos = PagoProducto.objects.filter(pago__registro__inscripcion__campana=campana)
     extras = PagoExtra.objects.filter(pago__registro__inscripcion__campana=campana)
     otros = PagoOtro.objects.filter(pago__registro__inscripcion__campana=campana)
     pagos = Pago.objects.filter(registro__inscripcion__campana=campana)
+    return servicios, productos, extras, otros, pagos
+
+
+def reporte_financiero(campana_id: int) -> dict:
+    campana = Campana.objects.get(id=campana_id)
+    servicios, productos, extras, otros, pagos = devolver_extras(campana)
 
     # --- Totales de pagos (para referencia, pero no se usan en la vista principal ahora) ---
     total_pagos_efectivo = pagos.filter(metodo="EFE").aggregate(
@@ -154,4 +158,96 @@ def reporte_financiero(campana_id: int) -> dict:
             "otro": total_pagos_otro,
             "total": total_pagos,
         },
+    }
+
+
+def financiero_detallado(campana_id: int):
+    campana = get_object_or_404(Campana, id=campana_id)
+
+    registros = (
+        Registro.objects.filter(inscripcion__campana=campana, tiempo_pago__isnull=False)
+        .select_related("pago")
+        .prefetch_related(
+            "pago__servicios",
+            "pago__productos",
+            "pago__extras",
+            "pago__otros",
+        )
+        .order_by("numero_turno")
+    )
+
+    # Productos activos en la campaña
+    productos_unicos = list(
+        ProductoCampana.objects.filter(campana=campana, esta_activo=True)
+        .values_list("producto__nombre", flat=True)
+        .distinct()
+        .order_by("producto__nombre")
+    )
+
+    data_registros = []
+
+    for reg in registros:
+        pago = getattr(reg, "pago", None)
+
+        # Inicializar mapa de productos
+        productos_dict = {nombre: None for nombre in productos_unicos}
+
+        if pago:
+            # Servicios
+            servicio_total = sum(s.precio for s in pago.servicios.all())
+
+            # Productos
+            for prod in pago.productos.all():
+                nombre = prod.nombre_producto
+                productos_dict[nombre] = prod.cantidad
+
+            # Extras
+            extras = list(pago.extras.all())
+            otros = list(pago.otros.all())
+
+            extra_data = (
+                {
+                    "descripcion": e.descripcion,
+                    "costo": e.precio,
+                }
+                for e in extras
+            )
+
+            otro_data = (
+                {
+                    "descripcion": o.descripcion,
+                    "costo": o.precio,
+                }
+                for o in otros
+            )
+
+            reg_data = {
+                "numero_turno": reg.numero_turno,
+                "nombres_tutor": reg.nombres_tutor,
+                "nombre": reg.nombre,
+                "observaciones": reg.observaciones,
+                "especie": reg.get_especie_display(),
+                "genero": reg.get_sexo_display(),
+                "peso": reg.peso,
+                "vulnerable": reg.vulnerable,
+                "barrio": reg.barrio_tutor,
+                "parroquia": reg.get_parroquia_tutor_display(),
+                "pago": {
+                    "servicio": servicio_total,
+                    "productos": productos_dict,
+                    "extras": list(extra_data),
+                    "otros": list(otro_data),
+                    "total": pago.monto_total,
+                    "metodo": pago.get_metodo_display(),
+                    "nota": pago.notas,
+                },
+            }
+
+            data_registros.append(reg_data)
+    total_general = sum(r["pago"]["total"] for r in data_registros if r.get("pago"))
+    return {
+        "registros": data_registros,
+        "items": productos_unicos,
+        "campana": campana,
+        "total_general": total_general,
     }
