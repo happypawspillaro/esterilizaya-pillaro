@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.staticfiles import finders
 from django.core.paginator import Paginator
+from django.db.models import F
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, response
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -40,7 +41,9 @@ def index(request):
 
 def lista(request, campana_id):
     page_number = request.GET.get("page", 1)
-    todos_registros = Registro.objects.filter(inscripcion__campana=campana_id)
+    todos_registros = Registro.objects.filter(inscripcion__campana=campana_id).order_by(
+        F("tiempo_pago").asc(nulls_first=True), "numero_turno"
+    )
     # Dato del primer resultado
     campana = Campana.objects.filter(id=campana_id).first()
     if not campana:
