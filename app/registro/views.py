@@ -468,8 +468,8 @@ def confirmar_pago(request, registro_id):
         registrar_pago(
             registro=registro,
             monto_total=total,
-            metodo=request.POST.get("method", "efectivo"),
-            notas=request.POST.get("notes", ""),
+            metodo=request.POST.get("metodo", "EFE"),
+            notas=request.POST.get("notas", ""),
             usuario=request.user if request.user.is_authenticated else None,
         )
         messages.success(request, "Pago registrado exitosamente.")
