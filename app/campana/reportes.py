@@ -184,6 +184,11 @@ def financiero_detallado(campana_id: int):
         .distinct()
         .order_by("producto__nombre")
     )
+    productos_info = list(
+        ProductoCampana.objects.filter(campana=campana, esta_activo=True)
+        .values("producto__nombre", "precio_compra")
+        .order_by("producto__nombre")
+    )
 
     data_registros = []
     total_servicio = 0
@@ -270,6 +275,7 @@ def financiero_detallado(campana_id: int):
         "registros": data_registros,
         "items": productos_unicos,
         "campana": campana,
+        "productos_info": productos_info,
         "total_general": total_general,
         "totales": {
             "servicio": total_servicio,
