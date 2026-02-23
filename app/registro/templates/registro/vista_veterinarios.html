@@ -13,6 +13,67 @@
 		{% bootstrap_javascript %}
 		<script src="{% static 'js/jquery.min.js' %}"></script>
 		<link href="{% static 'css/base.css' %}" rel="stylesheet" />
+		<style>
+			/* 1. Título fluido: Se encoge en móviles, crece en escritorio */
+			h2 {
+				font-size: clamp(1.2rem, 4vw, 2rem);
+			}
+			
+			/* 2. Fuente de tabla responsiva */
+			/* En móviles usamos un tamaño pequeño (aprox. 11px) para que quepan todas las columnas */
+			.table {
+				font-size: 0.75rem;
+			}
+			
+			/* 3. Escalado de la línea de información de fecha */
+			#fecha {
+				font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+			}
+			
+			/* 4. Configuración específica para encabezados de tabla en pantallas pequeñas */
+			.table thead th {
+				/* Usar una fuente base más pequeña para encabezados en móvil */
+				font-size: clamp(0.65rem, 2vw, 0.85rem);
+				/* Reducir el relleno (padding) para que las celdas no sean innecesariamente anchas */
+				padding: 4px 2px !important;
+				/* Centrar texto para una apariencia más limpia en columnas estrechas */
+				text-align: center;
+				vertical-align: middle;
+				/* Evita que encabezados largos se dividan en 3 líneas */
+				white-space: nowrap;
+			}
+			
+			/* 5. Ajuste para la columna 'No.' para que se mantenga pequeña */
+			.table thead th:first-child,
+			.table tbody td:first-child {
+				width: 30px;
+				text-align: center;
+			}
+			/* Estilo solo para PANTALLAS PEQUEÑAS (Móviles/Tablets) */
+			@media (max-width: 767px) {
+				.imagen-mascotas {
+					width: 40px; /* Se reduce solo en pantallas pequeñas */
+				}
+			}
+			
+			/* 6. Ajustes para Escritorio (Tablets en adelante) */
+			@media (min-width: 768px) {
+				.table {
+					font-size: 0.85rem;
+				}
+				.table thead th {
+					font-size: 0.8rem;
+					padding: 8px !important;
+				}
+			}
+			
+			/* 7. Pantallas Grandes */
+			@media (min-width: 1200px) {
+				.table {
+					font-size: 1rem;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<h2 class="text-center mb-2">Lista de Mascotas Registradas</h2>
