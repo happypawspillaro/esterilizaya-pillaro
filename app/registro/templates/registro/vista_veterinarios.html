@@ -4,92 +4,106 @@
 {% load thumbnail %}
 
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lista de Mascotas Campañas de Esterilización Bajo Costo</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'images/happypaws.ico' %}" />
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <link href="{% static 'css/base.css' %}" rel="stylesheet" />
-  </head>
-  <body>
-    <h2 class="text-center mb-4">Lista de Mascotas Registradas</h2>
-    <h2 class="text-center mb-4">Fecha: {{ fecha_campana }}</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover table-striped table-sm">
-        <thead class="table-light">
-          <tr>
-            <th>No.</th>
-            <th>Origen</th>
-            <th>Foto</th>
-            <th>Nombre Tutor</th>
-            <th>Especie</th>
-            <th>Peso(Kg)</th>
-            <th>ID</th>
-            <th>Vulnerable</th>
-            <th>Sexo</th>
-            <th>Edad</th>
-            <th>Observaciones</th>
-            <th>Estado fisiológico</th>
-            <th>Premed</th>
-            <th>Anes</th>
-            <th>Entregado</th>
-          </tr>
-        </thead>
-        <tbody id="mascotas-table-body">
-          <!-- Rows will be dynamically updated -->
-        </tbody>
-      </table>
-    </div>
-    <script>
-      function obtenerFotoDefecto(especie) {
-        const defaultPhotos = {
-          '🐈': '/static/images/mascotas/gato.png',
-          '🐕': '/static/images/mascotas/perro.png'
-        }
-        return defaultPhotos[especie.toLowerCase()]
-      }
-      function obtenerMascotas() {
-        $.ajax({
-          url: window.location.href,
-          dataType: 'json'
-        }).done(function (data) {
-          const $tableBody = $('#mascotas-table-body')
-          $tableBody.empty()
-          $.each(data.registros, function (_, mascota) {
-            const $row = $('<tr>')
-            if (mascota.sexo === '♂️') $row.addClass('table-info')
-            const date = new Date(mascota.fecha_registro)
-            $row.append($('<td>').text(mascota.numero_turno))
-            // Poner de la calle
-            $row.append($('<td>').text('C'))
-            const $img = $('<img>')
-              .attr('src', mascota.foto === '' ? obtenerFotoDefecto(mascota.especie) : mascota.miniatura)
-              .attr('alt', `Foto de ${mascota.nombre}`)
-              .addClass('imagen-mascotas')
-            $row.append($('<td>').append($img))
-            $row.append($('<td>').text(mascota.nombres_tutor))
-            $row.append($('<td>').text(mascota.especie === '🐈' ? '🐈 Felino' : '🐕 Canino'))
-            $row.append($('<td>').text(mascota.peso))
-            $row.append($('<td>').text(mascota.nombre))
-            $row.append($('<td>').text(mascota.vulnerable === true ? '✅' : ''))
-            $row.append($('<td>').text(mascota.sexo === '♂️' ? '♂️ Macho' : '♀️ Hembra'))
-            $row.append($('<td>').text(`${mascota.edad_anos}a ${mascota.edad_meses}m`))
-            $row.append($('<td>').text(mascota.observaciones))
-            $row.append($('<td>').text(''))
-            $row.append($('<td>').text(''))
-            $row.append($('<td>').text(''))
-            $row.append($('<td>').text(''))
-            $tableBody.append($row)
-          })
-        })
-      }
-      setInterval(obtenerMascotas, 5000)
-      $(document).ready(function () {
-        obtenerMascotas()
-      })
-    </script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Lista de Mascotas Campañas de Esterilización Bajo Costo</title>
+		<link rel="icon" type="image/x-icon" href="{% static 'images/happypaws.ico' %}" />
+		{% bootstrap_css %}
+		{% bootstrap_javascript %}
+		<script src="{% static 'js/jquery.min.js' %}"></script>
+		<link href="{% static 'css/base.css' %}" rel="stylesheet" />
+	</head>
+	<body>
+		<h2 class="text-center mb-2">Lista de Mascotas Registradas</h2>
+		<p class="text-start" id="fecha">
+			<strong>Fecha:</strong>
+			<span id="fecha-valor">{{ fecha_campana }}</span>
+			<i>Nomenclatura Origen:</i> <strong>🏠C</strong>=Cliente, <strong>🤕V</strong>=Vulnerable
+		</p>
+		<div class="table-responsive">
+			<table class="table table-bordered table-hover table-striped table-sm">
+				<thead class="table-light">
+					<tr>
+						<th>No.</th>
+						<th>Origen</th>
+						<th>Foto</th>
+						<th>Nombre Tutor</th>
+						<th>Especie</th>
+						<th>Peso(Kg)</th>
+						<th>ID</th>
+						<th>Sexo</th>
+						<th>Edad</th>
+						<th>Observaciones</th>
+						<th>Estado fisiológico</th>
+						<th>Premed</th>
+						<th>Anes</th>
+						<th>Entregado</th>
+					</tr>
+				</thead>
+				<tbody id="mascotas-table-body"></tbody>
+			</table>
+		</div>
+		<script>
+			function obtenerFotoDefecto(especie) {
+				const defaultPhotos = {
+					"🐈": "/static/images/mascotas/gato.png",
+					"🐕": "/static/images/mascotas/perro.png",
+				};
+				return defaultPhotos[especie.toLowerCase()];
+			}
+			function obtenerMascotas() {
+				$.ajax({
+					url: window.location.href,
+					dataType: "json",
+				}).done(function (data) {
+					const $tableBody = $("#mascotas-table-body");
+					const $fechaValor = $("#fecha-valor");
+					$fechaValor.text(data.fecha_campana);
+					$tableBody.empty();
+					$.each(data.registros, function (_, mascota) {
+						const $row = $("<tr>");
+						if (mascota.sexo === "♂️") $row.addClass("table-info");
+						const date = new Date(mascota.fecha_registro);
+						$row.append($("<td>").text(mascota.numero_turno));
+						$row.append(
+							$("<td>")
+								.text(mascota.vulnerable ? "🤕V" : "🏠C")
+								.css("font-weight", mascota.vulnerable ? "bold" : "normal")
+						);
+						const $img = $("<img>")
+							.attr(
+								"src",
+								mascota.foto === ""
+									? obtenerFotoDefecto(mascota.especie)
+									: mascota.miniatura
+							)
+							.attr("alt", `Foto de ${mascota.nombre}`)
+							.addClass("imagen-mascotas");
+						$row.append($("<td>").append($img));
+						$row.append($("<td>").text(mascota.nombres_tutor));
+						$row.append(
+							$("<td>").text(mascota.especie === "🐈" ? "🐈 Felino" : "🐕 Canino")
+						);
+						$row.append($("<td>").text(mascota.peso));
+						$row.append($("<td>").text(mascota.nombre));
+						$row.append(
+							$("<td>").text(mascota.sexo === "♂️" ? "♂️ Macho" : "♀️ Hembra")
+						);
+						$row.append($("<td>").text(`${mascota.edad_anos}a ${mascota.edad_meses}m`));
+						$row.append($("<td>").text(mascota.observaciones));
+						$row.append($("<td>").text(""));
+						$row.append($("<td>").text(""));
+						$row.append($("<td>").text(""));
+						$row.append($("<td>").text(""));
+						$tableBody.append($row);
+					});
+				});
+			}
+			setInterval(obtenerMascotas, 5000);
+			$(document).ready(function () {
+				obtenerMascotas();
+			});
+		</script>
+	</body>
 </html>
