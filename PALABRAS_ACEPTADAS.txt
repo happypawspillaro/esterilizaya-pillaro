@@ -8,6 +8,7 @@ convencional
 copie
 diagrama
 doble
+excede
 foto
 Foto
 inicial
@@ -20,5 +21,6 @@ Profesional
 registre
 responsable
 Responsable
+ser
 te
 varios
