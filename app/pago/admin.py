@@ -48,7 +48,7 @@ class PagoOtroInline(admin.TabularInline):
 class PagoAdmin(admin.ModelAdmin):
     list_display = ("id", "registro_mascota", "monto_total", "fecha_pago", "metodo", "usuario")
     list_filter = ("metodo", "fecha_pago", "usuario")
-    search_fields = ("registro__mascota_name", "notas", "usuario__username")
+    search_fields = ("registro__nombre", "notas", "usuario__username")
     readonly_fields = ("fecha_pago",)
     fieldsets = (
         (None, {"fields": ("registro", "monto_total", "metodo", "notas", "usuario")}),
@@ -57,7 +57,7 @@ class PagoAdmin(admin.ModelAdmin):
     inlines = [PagoServicioInline, PagoProductoInline, PagoExtraInline, PagoOtroInline]
 
     def registro_mascota(self, obj):
-        return obj.registro.mascota_name
+        return obj.registro.nombre
 
     registro_mascota.short_description = "Mascota"
 
@@ -69,7 +69,7 @@ class PagoAdmin(admin.ModelAdmin):
 class PagoServicioAdmin(admin.ModelAdmin):
     list_display = ("id", "pago", "servicio", "nombre_servicio", "precio", "costo_veterinario")
     list_filter = ("pago__fecha_pago",)
-    search_fields = ("nombre_servicio", "descripcion", "pago__registro__mascota_name")
+    search_fields = ("nombre_servicio", "descripcion", "pago__registro__nombre")
     raw_id_fields = ("pago", "servicio")
 
 
@@ -77,7 +77,7 @@ class PagoServicioAdmin(admin.ModelAdmin):
 class PagoProductoAdmin(admin.ModelAdmin):
     list_display = ("id", "pago", "producto", "nombre_producto", "cantidad", "precio_unitario", "costo_unitario")
     list_filter = ("pago__fecha_pago",)
-    search_fields = ("nombre_producto", "pago__registro__mascota_name")
+    search_fields = ("nombre_producto", "pago__registro__nombre")
     raw_id_fields = ("pago", "producto")
 
 
@@ -85,7 +85,7 @@ class PagoProductoAdmin(admin.ModelAdmin):
 class PagoExtraAdmin(admin.ModelAdmin):
     list_display = ("id", "pago", "descripcion", "precio")
     list_filter = ("pago__fecha_pago",)
-    search_fields = ("descripcion", "pago__registro__mascota_name")
+    search_fields = ("descripcion", "pago__registro__nombre")
     raw_id_fields = ("pago",)
 
 
@@ -93,5 +93,5 @@ class PagoExtraAdmin(admin.ModelAdmin):
 class PagoOtroAdmin(admin.ModelAdmin):
     list_display = ("id", "pago", "descripcion", "precio")
     list_filter = ("pago__fecha_pago",)
-    search_fields = ("descripcion", "pago__registro__mascota_name")
+    search_fields = ("descripcion", "pago__registro__nombre")
     raw_id_fields = ("pago",)
