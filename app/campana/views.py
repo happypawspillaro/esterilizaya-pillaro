@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Sum
@@ -12,6 +13,7 @@ from registro.models import Registro
 
 from .forms import CampanaForm
 from .models import Campana
+from .reportes import financiero_detallado, reporte_financiero
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,11 @@ def index(request):
             instancia = forma.save(commit=False)
             instancia.usuario = usuario
             instancia.save()
-            messages.success(request, "¡Campaña registrada exitosamente!")
+            messages.success(
+                request,
+                "¡Campaña registrada exitosamente! Revisa en el administrador "
+                "los items creados por defecto para esta campaña.",
+            )
             return redirect("inicio:index")
         else:
             forma.clean()
@@ -68,3 +74,15 @@ def listar_canton_parroquia(request):
     if not canton:
         return JsonResponse({"parroquias": PARROQUIAS_CANTON})
     return JsonResponse({"parroquias": PARROQUIAS_CANTON.get(canton, [])})
+
+
+@staff_member_required  # Solo personal autorizado
+def reporte_financiero_resumen(request, campana_id):
+    report_data = reporte_financiero(campana_id)
+    return render(request, "campana/reporte_financiero.html", report_data)
+
+
+@staff_member_required  # Solo personal autorizado
+def reporte_financiero_detallado(request, campana_id):
+    registro_data = financiero_detallado(campana_id)
+    return render(request, "campana/reporte_financiero_detallado.html", registro_data)

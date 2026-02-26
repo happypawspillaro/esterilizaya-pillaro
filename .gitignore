@@ -184,6 +184,7 @@ app/static/js/autocomplete.js
 app/static/js/jquery*
 app/static/js/chart*
 app/static/js/leaflet*
+app/static/js/htmx*
 
 # Archivos iniciales
 app/static/images/marker*

@@ -18,9 +18,12 @@ Destinado a funcionar en lugares _sin conexión_ a internet, sólo necesitas una
 ## Herramientas Software
 
 - [Docker](https://www.docker.com/get-started/) >= 28.x
-- [Django](https://www.djangoproject.com/) >= 5.x
+- [Django](https://www.djangoproject.com/) >= 6.x
+- [UWSGI](https://github.com/unbit/uwsgi) >= 2.x
 - [MariaDB](https://mariadb.org/) >= 11.x
 - [Bootstrap](https://getbootstrap.com/) >= 5.x
+- [Bootstrap Icons](https://icons.getbootstrap.com/) >= 1.x
+- [Django Boostrap5](https://github.com/zostera/django-bootstrap5) >= 26.x
 - [boostrap-autocomplete](https://bootstrap-autocomplete.readthedocs.io/en/latest/) >= 2.x
 - [jQuery](https://jquery.com/) >= v3.x
 - [WeasyPrint](https://weasyprint.org/) >= v63.x
@@ -28,6 +31,7 @@ Destinado a funcionar en lugares _sin conexión_ a internet, sólo necesitas una
 - [Chart.js](https://www.chartjs.org/) >= 4.5.x
 - [Leaflet](https://leafletjs.com/) >= 1.9.x
 - [easy-thumbnails](https://github.com/SmileyChris/easy-thumbnails) >=2.x
+- [htmx](https://htmx.org/) >= 2.x
 
 ## Instalación
 

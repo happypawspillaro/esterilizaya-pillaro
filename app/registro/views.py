@@ -1,24 +1,34 @@
 import json
 import logging
+from decimal import Decimal, InvalidOperation
 
-from campana.models import Campana
+from campana.models import Campana, Servicio, ServicioCampana
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.staticfiles import finders
 from django.core.paginator import Paginator
-from django.http import JsonResponse, response
+from django.db.models import F
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, response
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import ListView
 from easy_thumbnails.files import get_thumbnailer
 from esterilizaya.constantes import RUTA_PDFS
 from inscripcion.models import Inscripcion
-from registro.models import Registro
+from pago.services import registrar_pago
+from registro.models import ItemRegistro, Registro
 from weasyprint import HTML
 
-from .forms import RegistroForm
+from .forms import (
+    AnadirFormaExtraVeterinario,
+    AnadirMedicinaForma,
+    FormaOtroOrganizacion,
+    RegistroForm,
+)
+from .utils import calcular_precio_sugerido_esterilizacion, sugerir_medicamento
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +41,9 @@ def index(request):
 
 def lista(request, campana_id):
     page_number = request.GET.get("page", 1)
-    todos_registros = Registro.objects.filter(inscripcion__campana=campana_id)
+    todos_registros = Registro.objects.filter(inscripcion__campana=campana_id).order_by(
+        F("tiempo_pago").asc(nulls_first=True), "numero_turno"
+    )
     # Dato del primer resultado
     campana = Campana.objects.filter(id=campana_id).first()
     if not campana:
@@ -135,26 +147,30 @@ def ver_recetas(request, campana_id):
 
 
 class RegistradoListView(ListView):
+    """Vista para mostrar los registros ingresados que no han salido a los veterinarios en la campaña."""
+
     model = Registro
     template_name = "registro/vista_veterinarios.html"
     context_object_name = "registros"
 
     def get_queryset(self):
         """
-        Filters pets by the given campaign_id.
+        Filtrar mascotas para el parametro dado campana_id.
         """
-        campana_id = self.kwargs.get("campana_id")  # Retrieve campaign_id from URL kwargs
-        return Registro.objects.filter(inscripcion__campana=campana_id)  # Filter pets for the given campaign
+        campana_id = self.kwargs.get("campana_id")  # Obtener campana_id del URL kwargs
+        return Registro.objects.filter(inscripcion__campana=campana_id).filter(tiempo_pago__isnull=True)
 
     def get(self, request, *args, **kwargs):
         """
-        Handles AJAX requests to dynamically update the table.
+        Gestiona AJAX request para dinámicamente actualizar la tabla.
         """
         campana_id = self.kwargs.get("campana_id")
         if request.headers.get("x-requested-with") == "XMLHttpRequest":  # Check for Ajax requests
             campana = get_object_or_404(Campana, id=campana_id)
             registros = list(
-                Registro.objects.filter(inscripcion__campana=campana_id).values(
+                Registro.objects.filter(inscripcion__campana=campana_id)
+                .filter(tiempo_pago__isnull=True)
+                .values(
                     "foto",
                     "especie",
                     "peso",
@@ -264,3 +280,206 @@ def ver_mascota(request, id):
         messages.error(request, f"Error, el registro {id} no existe")
         return redirect("mascotas:index")
     return render(request, "mascota.html", {"registro": registro})
+
+
+@login_required(login_url="cuenta:login")
+def vista_carrito(request, registro_id):
+    """Vista del carrito de pago para un registro específico.
+    Muestra el servicio de esterilización y sugiere medicinas."""
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    campana = registro.inscripcion.campana
+
+    # Obtener servicio de esterilización
+    servicio_ester = Servicio.objects.get(categoria="EST")
+    servicio_campana = ServicioCampana.objects.get(campana=campana, servicio=servicio_ester)
+
+    # Crear ítem de esterilización si no existe
+    item_esterilizacion, _ = ItemRegistro.objects.get_or_create(
+        registro=registro,
+        servicio=servicio_ester,
+        defaults={
+            "descripcion": servicio_ester.nombre,
+            "cantidad": 1,
+            "precio_unitario": calcular_precio_sugerido_esterilizacion(campana, registro.peso, registro.vulnerable),
+            "costo_unitario": servicio_campana.costo_veterinario,  # costo fijo según campaña
+        },
+    )
+
+    # Sugerir medicina
+    sugerido = sugerir_medicamento(campana, registro.especie, registro.peso)
+    if sugerido and not ItemRegistro.objects.filter(registro=registro, producto=sugerido.producto).exists():
+        cantidad_defecto = 4 if registro.especie == "🐕" else 1
+        ItemRegistro.objects.create(
+            registro=registro,
+            producto=sugerido.producto,
+            descripcion=sugerido.producto.nombre,
+            cantidad=cantidad_defecto,
+            precio_unitario=sugerido.precio_venta,
+            costo_unitario=sugerido.precio_compra,
+        )
+
+    forma_medicina = AnadirMedicinaForma(campana=campana, especie=registro.especie, prefix="med")
+    forma_extra = AnadirFormaExtraVeterinario(prefix="extra")
+    forma_otra = FormaOtroOrganizacion(prefix="otro")
+
+    context = {
+        "registro": registro,
+        "items": registro.items.all(),
+        "item_esterilizacion": item_esterilizacion,
+        "forma_medicina": forma_medicina,
+        "forma_extra": forma_extra,
+        "forma_otra": forma_otra,
+    }
+    return render(request, "pago/carrito.html", context)
+
+
+@login_required(login_url="cuenta:login")
+def htmx_actualizar_esterilizacion(request, registro_id):
+    """HTMX: Actualiza el precio del servicio de esterilización según el peso y vulnerabilidad."""
+    if request.method != "POST":
+        return HttpResponseBadRequest("Método no permitido")
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    try:
+        nuevo_precio = Decimal(request.POST.get("precio_esterilizacion", ""))
+    except (InvalidOperation, TypeError):
+        return HttpResponse("Precio inválido", status=400)
+
+    servicio_ester = Servicio.objects.get(categoria="EST")
+    item_esterilizacion = ItemRegistro.objects.get(registro=registro, servicio=servicio_ester)
+    item_esterilizacion.precio_unitario = nuevo_precio
+    item_esterilizacion.save()
+
+    context = {"registro": registro, "items": registro.items.all()}
+    html = render_to_string("pago/partials/items_carrito.html", context, request=request)
+    return HttpResponse(html)
+
+
+@login_required(login_url="cuenta:login")
+def htmx_anadir_item(request, registro_id):
+    """
+    Añade un ítem al carrito desde los formularios de medicina, extra u otro.
+    El tipo de ítem se determina por el campo 'tipo_item' en el POST.
+    """
+    if request.method != "POST":
+        return HttpResponseBadRequest("Método no permitido")
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    tipo_item = request.POST.get("tipo_item")
+    if tipo_item == "medicina":
+        form = AnadirMedicinaForma(
+            campana=registro.inscripcion.campana, especie=registro.especie, data=request.POST, prefix="med"
+        )
+        if form.is_valid():
+            producto_campana = form.cleaned_data["producto_campana"]
+            cantidad = form.cleaned_data["cantidad"]
+            ItemRegistro.objects.create(
+                registro=registro,
+                producto=producto_campana.producto,
+                descripcion=producto_campana.producto.nombre,
+                cantidad=cantidad,
+                precio_unitario=producto_campana.precio_venta,
+                costo_unitario=producto_campana.precio_compra,
+            )
+        else:
+            return HttpResponse("Formulario inválido", status=400)
+    elif tipo_item == "extra":
+        form = AnadirFormaExtraVeterinario(data=request.POST, prefix="extra")
+        if form.is_valid():
+            data = form.cleaned_data
+            ItemRegistro.objects.create(
+                registro=registro,
+                descripcion="[Extra] " + data["descripcion"],
+                cantidad=1,
+                precio_unitario=data["precio"],
+                costo_unitario=data["precio"],
+            )
+        else:
+            return HttpResponse("Formulario inválido", status=400)
+    elif tipo_item == "otro":
+        form = FormaOtroOrganizacion(data=request.POST, prefix="otro")
+        if form.is_valid():
+            data = form.cleaned_data
+            ItemRegistro.objects.create(
+                registro=registro,
+                descripcion="[Otro] " + data["descripcion"],
+                cantidad=1,
+                precio_unitario=data["precio"],
+                costo_unitario=data["precio"],
+            )
+        else:
+            return HttpResponse("Formulario inválido", status=400)
+    else:
+        return HttpResponseBadRequest("Tipo de item inválido")
+
+    context = {"registro": registro, "items": registro.items.all()}
+    html = render_to_string("pago/partials/items_carrito.html", context, request=request)
+    return HttpResponse(html)
+
+
+@login_required(login_url="cuenta:login")
+def htmx_actualizar_cantidad(request, registro_id, item_id):
+    """HTMX: Actualiza la cantidad de un item (solo para medicinas)."""
+    if request.method != "POST":
+        return HttpResponseBadRequest("Método no permitido")
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    item = get_object_or_404(ItemRegistro, id=item_id, registro=registro)
+    # Solo permitir editar cantidad si es medicina (tiene producto)
+    if not item.producto:
+        return HttpResponse("No se puede editar este item", status=403)
+    try:
+        nueva_cantidad = int(request.POST.get("cantidad", 0))
+    except ValueError:
+        return HttpResponse("Cantidad inválida", status=400)
+    if nueva_cantidad < 1:
+        return HttpResponse("Cantidad debe ser al menos 1", status=400)
+    item.cantidad = nueva_cantidad
+    item.save()
+    context = {"registro": registro, "items": registro.items.all()}
+    html = render_to_string("pago/partials/items_carrito.html", context, request=request)
+    return HttpResponse(html)
+
+
+@login_required(login_url="cuenta:login")
+@ensure_csrf_cookie
+def htmx_remover_item(request, registro_id, item_id):
+    """Remueve un item del carrito. No se puede remover el servicio de esterilización."""
+    if request.method != "DELETE":
+        return HttpResponseBadRequest("Método no permitido")
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    item = get_object_or_404(ItemRegistro, id=item_id, registro=registro)
+    if item.servicio and item.servicio.is_esterilizacion:
+        return HttpResponse("No se puede eliminar el servicio de esterilización", status=403)
+    item.delete()
+    context = {"registro": registro, "items": registro.items.all()}
+    html = render_to_string("pago/partials/items_carrito.html", context, request=request)
+    return HttpResponse(html)
+
+
+@login_required(login_url="cuenta:login")
+def htmx_total_carrito(request, registro_id):
+    """Calcula el total del carrito sumando precio_unitario * cantidad de cada item."""
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    total = sum(item.total_price for item in registro.items.all())
+    return HttpResponse(f"Total: ${total:.2f}")
+
+
+@login_required(login_url="cuenta:login")
+def confirmar_pago(request, registro_id):
+    """Confirma el pago, registra el pago en la base de datos y redirige a la lista de registros."""
+    registro = get_object_or_404(Registro, id=registro_id, tiempo_pago__isnull=True)
+    if request.method == "POST":
+        total = sum(item.total_price for item in registro.items.all())
+        registrar_pago(
+            registro=registro,
+            monto_total=total,
+            metodo=request.POST.get("metodo", "EFE"),
+            notas=request.POST.get("notas", ""),
+            usuario=request.user if request.user.is_authenticated else None,
+        )
+        messages.success(request, "Pago registrado exitosamente.")
+        return redirect("registro:lista", campana_id=registro.inscripcion.campana.id)
+
+    context = {
+        "registro": registro,
+        "total": sum(item.total_price for item in registro.items.all()),
+    }
+    return render(request, "pago/confirmar_pago.html", context)

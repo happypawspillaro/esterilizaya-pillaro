@@ -1,5 +1,6 @@
 import logging
 
+from catalogo.models import Producto, Servicio
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -59,7 +60,44 @@ class Campana(models.Model):
     pasadas = PasadasManager()
 
     def __str__(self) -> str:
-        return self.nombre
+        return f"{self.nombre} | {self.get_canton_display()} | {self.get_parroquia_display()}"
 
     def get_absolute_url(self):
         return reverse("campana:mostrar", args=[self.fecha.year, self.parroquia, self.fecha.month, self.fecha.day])
+
+
+class ProductoCampana(models.Model):
+    """Precios de un producto en una campaña específica."""
+
+    campana = models.ForeignKey(Campana, on_delete=models.CASCADE, related_name="producto")
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name="precios_campana")
+    precio_compra = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo de compra")
+    precio_venta = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio de venta")
+    esta_activo = models.BooleanField(default=True)
+    notas = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ("campana", "producto")
+        verbose_name = "Producto por campaña"
+        verbose_name_plural = "Productos por campaña"
+
+    def __str__(self) -> str:
+        return f"{self.producto.nombre}"
+
+
+class ServicioCampana(models.Model):
+    """Precios de un servicio en una campaña específica."""
+
+    campana = models.ForeignKey(Campana, on_delete=models.CASCADE, related_name="servicios")
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name="precios_campana")
+    costo_veterinario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo veterinario")
+    precio_publico = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio público")
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("campana", "servicio")
+        verbose_name = "Servicio por campaña"
+        verbose_name_plural = "Servicios por campaña"
+
+    def __str__(self):
+        return f"{self.servicio.nombre} en {self.campana.nombre}"

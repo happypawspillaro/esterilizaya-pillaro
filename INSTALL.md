@@ -54,6 +54,9 @@ Estas instrucciones están indicadas para usuarios que corran en sistemas basado
       wget -P app/static/css https://unpkg.com/leaflet@$LEAFLET_VERSION/dist/leaflet.css
       wget -P app/static/js https://unpkg.com/leaflet@$LEAFLET_VERSION/dist/leaflet.js
       wget -P app/static/js https://unpkg.com/leaflet@$LEAFLET_VERSION/dist/leaflet.js.map
+      # Descarga HTMX
+      HTMX_VERSION="2.0.8"
+      wget -P app/static/js https://cdn.jsdelivr.net/npm/htmx.org@$HTMX_VERSION/dist/htmx.min.js
    ```
 
 5. Por favor cambia los permisos de tu carpeta de código, en Alpine Linux, el usuario y grupo `www-data` es diferente al de Debian/Ubuntu, en tal caso, usa la siguiente línea para modificar los permisos:
@@ -67,15 +70,18 @@ Estas instrucciones están indicadas para usuarios que corran en sistemas basado
 6. Descargue los contenedores y ejecuta las migraciones el siguiente comando:
 
    ```bash
-      docker compose -f docker-compose.yml -f docker-compose.prod.yml build
-      docker compose -f docker-compose.yml -f docker-compose.migrate.yml up db -d
-      docker compose -f docker-compose.yml -f docker-compose.migrate.yml up web
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+   # En caso de no tener tu ruta de migración, inicializa y da permisos para escribir
+   RUTA_MIGRACION=app/tu_app/migrations
+   sudo mkdir -p $RUTA_MIGRACION && sudo touch $RUTA_MIGRACION/__init__.py && sudo chmod 777 $RUTA_MIGRACION
+   docker compose -f docker-compose.yml -f docker-compose.migrate.yml up db -d
+   docker compose -f docker-compose.yml -f docker-compose.migrate.yml -f docker-compose.dev.yml up web
    ```
 
 7. Crea un nuevo superusuario del sistema, con el siguiente comando:
 
    ```bash
-      docker compose -f docker-compose.yml -f docker-compose.superuser.yml up web
+   docker compose -f docker-compose.yml -f docker-compose.superuser.yml up web
    ```
 
 8. Genera el certificado SSL

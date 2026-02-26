@@ -44,7 +44,10 @@
 						<thead class="table-success">
 							<tr>
 								<th>ID</th>
-								<th>Número Turno</th>
+								<th>Turno</th>
+								{% if request.user.is_authenticated %}
+									<th>Pago</th>
+								{% endif %}
 								<th>Nombre Mascota</th>
 								<th>Foto</th>
 								<th>Nombre Tutor</th>
@@ -63,6 +66,16 @@
 									<td>
 										<span class="badge bg-primary">{{ registro.numero_turno }}</span>
 									</td>
+									{% if request.user.is_authenticated %}
+										<td>
+											{% if registro.tiempo_pago %}
+												<span class="badge border border-success text-success">Pagado</span>
+											{% else %}
+												{% url 'registro:carrito' registro.id as url_pago_preview %}
+												{% bootstrap_button '<i class="bi bi-wallet2"></i> Cobrar' button_type='link' href=url_pago_preview size='sm' button_class='btn-success' %}
+											{% endif %}
+										</td>
+									{% endif %}
 									<td>
 										<a href="{{ registro.get_absolute_url }}">{{ registro.nombre }}</a>
 									</td>
@@ -77,11 +90,11 @@
 									{% if request.user.is_authenticated %}
 										<td>
 											{% url 'registro:ver_ficha' registro.inscripcion.campana.id registro.id as url_ficha %}
-											{% bootstrap_button '<i class="bi bi-eye"></i> Ver Ficha' button_type='link' href=url_ficha size='sm' button_class='btn-success' %}
+											{% bootstrap_button '<i class="bi bi-eye"></i> Ver' button_type='link' href=url_ficha size='sm' button_class='btn-info' %}
 										</td>
 										<td>
 											{% url 'registro:generar_pdf' registro.id as url_imprimir %}
-											{% bootstrap_button '<i class="bi bi-printer"></i> Imprimir ficha' button_type='link' href=url_imprimir size='sm' %}
+											{% bootstrap_button '<i class="bi bi-printer"></i> Imprimir' button_type='link' href=url_imprimir size='sm' %}
 										</td>
 									{% endif %}
 								</tr>

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+	Carrito de {{ registro.nombre }}
+{% endblock %}
+
+{% block extra_head %}
+	<style>
+		.fila-item {
+			margin: 10px 0;
+			padding: 15px;
+			border: 1px solid #dee2e6;
+			border-radius: 8px;
+			background-color: #f8f9fa;
+		}
+		.forma-esterilizacion,
+		.forma-cantidad {
+			display: inline-block;
+			margin-left: 10px;
+		}
+		.total {
+			font-size: 1.5rem;
+			font-weight: bold;
+			color: #198754;
+		}
+		.anadir-seccion {
+			margin-top: 30px;
+			border-top: 2px solid #0d6efd;
+			padding-top: 20px;
+		}
+		.anadir-forma {
+			background: #e9ecef;
+			padding: 20px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+		}
+		/* Mejoras para inputs en móviles */
+		input[type="number"],
+		input[type="text"],
+		select.form-select,
+		textarea.form-control {
+			font-size: 16px;
+			background-color: #ffffff !important;
+			color: #212529 !important;
+			border: 1px solid #ced4da;
+			border-radius: 0.25rem;
+			padding: 0.5rem 0.75rem;
+			-webkit-appearance: none;
+			appearance: none;
+		}
+		input[type="number"]:focus,
+		input[type="text"]:focus,
+		select.form-select:focus,
+		textarea.form-control:focus {
+			border-color: #80bdff;
+			box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+			outline: none;
+		}
+		.input-group.input-group-sm {
+			max-width: 100%;
+		}
+		.btn-group .btn {
+			background-color: #ffffff;
+			border-color: #ced4da;
+			color: #212529;
+		}
+		.btn-group .btn:hover {
+			background-color: #e2e6ea;
+		}
+		@media (max-width: 768px) {
+			.forma-esterilizacion,
+			.forma-cantidad {
+				display: block;
+				margin-top: 10px;
+				margin-left: 0;
+			}
+			.btn-group {
+				margin-top: 5px;
+			}
+			.form-select,
+			.form-control,
+			.input-group-text {
+				font-size: 0.95rem;
+			}
+			.btn {
+				font-size: 0.95rem;
+				padding: 8px 12px;
+			}
+			.total {
+				font-size: 1.3rem;
+			}
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+	<div class="container mt-4">
+		<h1 class="mb-4">
+			<i class="bi bi-cart"></i> Carrito para {{ registro.nombre }}
+			<small class="text-muted">(Turno {{ registro.numero_turno }})</small>
+		</h1>
+
+		<div class="alert alert-info">
+			<i class="bi bi-info-circle"></i>
+			<strong>Campaña:</strong> {{ registro.inscripcion.campana.nombre }} |
+			<strong>Especie:</strong> {{ registro.get_especie_display }} {{ registro.especie }} |
+			<strong>Peso:</strong> {{ registro.peso|default:'No registrado' }} kg 
+			{% if registro.observaciones %}
+				|</br><strong>Observaciones:</strong> {{ registro.observaciones }}
+			{% endif %}
+			{% if registro.vulnerable %}
+				|</br><strong>Vulnerable:</strong>
+				✅
+			{% endif %}
+		</div>
+
+		<div id="cart-items-container">
+			{% include 'pago/partials/items_carrito.html' %}
+		</div>
+
+		<div class="d-flex justify-content-between align-items-center mt-4">
+			<h3>Total:</h3>
+			<div id="cart-total" class="total" hx-get="{% url 'registro:htmx_total_carrito' registro.id %}" hx-trigger="load, itemUpdated from:body" hx-target="this">Cargando...</div>
+		</div>
+
+		<div class="anadir-seccion">
+			<h2 class="h4 mb-3"><i class="bi bi-plus-circle"></i> Añadir items</h2>
+
+			<div class="anadir-forma">
+				<h3 class="h5"><i class="bi bi-capsule"></i> Medicina</h3>
+				<form hx-post="{% url 'registro:htmx_anadir_item' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
+					{% csrf_token %}
+					<input type="hidden" name="tipo_item" value="medicina" />
+					{% bootstrap_form forma_medicina layout='horizontal' %}
+					{% bootstrap_button 'Añadir medicina' button_type='submit' button_class='btn-primary' %}
+				</form>
+			</div>
+
+			<div class="anadir-forma">
+				<h3 class="h5"><i class="bi bi-plus-circle-dotted"></i> Extra Veterinario</h3>
+				<form hx-post="{% url 'registro:htmx_anadir_item' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
+					{% csrf_token %}
+					<input type="hidden" name="tipo_item" value="extra" />
+					{% bootstrap_form forma_extra layout='horizontal' %}
+					{% bootstrap_button 'Añadir extra' button_type='submit' button_class='btn-primary' %}
+				</form>
+			</div>
+
+			<div class="anadir-forma">
+				<h3 class="h5"><i class="bi bi-plus-square-fill"></i> Otro</h3>
+				<form hx-post="{% url 'registro:htmx_anadir_item' registro.id %}" hx-target="#cart-items-container" hx-swap="innerHTML">
+					{% csrf_token %}
+					<input type="hidden" name="tipo_item" value="otro" />
+					{% bootstrap_form forma_otra layout='horizontal' %}
+					{% bootstrap_button 'Añadir otro' button_type='submit' button_class='btn-primary' %}
+				</form>
+			</div>
+		</div>
+
+		<div class="mt-4 mb-5">
+			<a href="{% url 'registro:confirmar_pago' registro.id %}" class="btn btn-success btn-lg"><i class="bi bi-credit-card"></i> Confirmar y pagar</a>
+			<a href="{% url 'registro:lista' registro.inscripcion.campana.id %}" class="btn btn-outline-secondary ms-2"><i class="bi bi-arrow-left"></i> Volver</a>
+		</div>
+	</div>
+{% endblock %}
+
+{% block extra_js %}
+	<script>
+		// Disparar evento para actualizar el total después de cada modificación del carrito
+		document.body.addEventListener("htmx:afterRequest", function (evt) {
+			if (evt.detail.target && evt.detail.target.id === "cart-items-container") {
+				htmx.trigger("#cart-total", "itemUpdated");
+			}
+		});
+		
+		// Manejar CSRF para peticiones DELETE (HTMX lo incluye automáticamente si está en cookie)
+		document.body.addEventListener("htmx:configRequest", function (evt) {
+			evt.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
+		});
+		
+		// Limpiar formularios después de añadir un item exitosamente
+		document.body.addEventListener("htmx:afterRequest", function (evt) {
+			// Verificar que la petición fue a htmx_anadir_item y fue exitosa
+			if (
+				evt.detail.pathInfo.requestPath.includes("anadir_item") &&
+				evt.detail.successful
+			) {
+				const form = evt.detail.elt.closest("form");
+				if (form) {
+					// Resetear campos de texto y number
+					form
+						.querySelectorAll('input[type="text"], input[type="number"], textarea')
+						.forEach((input) => {
+							if (input.type === "number") {
+								input.value = input.defaultValue; // restaura valor por defecto (ej. 1)
+							} else {
+								input.value = "";
+							}
+						});
+					// Resetear selects al primer elemento (placeholder)
+					form.querySelectorAll("select").forEach((select) => {
+						select.selectedIndex = 0;
+					});
+				}
+			}
+		});
+	</script>
+{% endblock %}

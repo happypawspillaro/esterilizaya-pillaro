@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load extra_financieros %}
+
+{% block title %}
+	Reporte financiero detallado - {{ campana.nombre }}
+{% endblock %}
+
+{% block extra_head %}
+<style>
+	@media print {
+		@page {
+			size: A4 landscape;
+			margin: 0.7cm;
+		}
+
+		body {
+			font-size: 9px;              /* ↓ tamaño base */
+			line-height: 1.1;
+			color: #000;
+		}
+
+		h4, h5, h6 {
+			font-size: 11px;
+			margin: 4px 0;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		th, td {
+			border: 1px solid #000 !important;
+			padding: 2px 4px !important; /* ↓ menos padding */
+			font-size: 8px;              /* ↓ aún más compacto */
+			vertical-align: middle;
+		}
+
+		thead th {
+			font-size: 8px;
+		}
+
+		.table {
+			margin-bottom: 0;
+		}
+
+		.card, .shadow-sm {
+			box-shadow: none !important;
+			border: none !important;
+		}
+
+		.badge {
+			border: 1px solid #000;
+			background: none !important;
+			color: #000 !important;
+			font-size: 7px;
+			padding: 1px 3px;
+		}
+
+		/* Ocultar todo excepto área impresión */
+		body * {
+			visibility: hidden;
+		}
+
+		#area-impresion,
+		#area-impresion * {
+			visibility: visible;
+		}
+
+		#area-impresion {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+		}
+
+		/* Repetir encabezado si hubiera más de una página */
+		thead {
+			display: table-header-group;
+		}
+
+		tfoot {
+			display: table-row-group;
+		}
+
+		.d-print-none {
+			display: none !important;
+		}
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid mt-4">
+		<!-- Encabezado -->
+		<div class="d-flex justify-content-between align-items-center mb-3">
+			<a href="{% url 'campana:reporte_financiero_resumen' campana.id %}" class="btn btn-outline-secondary btn-sm">← Volver</a>
+			<div class="d-print-none mb-3 text-end">
+				<button onclick="window.print()" class="btn btn-outline-dark btn-sm">🖨 Imprimir</button>
+			</div>
+			<h4 class="mb-0">
+				Reporte Financiero Detallado
+				<small class="text-muted">{{ campana.nombre }}</small>
+			</h4>
+		</div>
+		<!-- RESUMEN FINANCIERO -->
+		<div class="row mb-4">
+			<div class="col-md-3">
+				<div class="card shadow-sm text-center">
+					<div class="card-body">
+						<small class="text-muted">Total Registros</small>
+						<h5 class="mb-0">{{ registros|length }}</h5>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-3">
+				<div class="card shadow-sm text-center bg-light">
+					<div class="card-body">
+						<small class="text-muted">Total Recaudado</small>
+						<h5 class="mb-0 text-success">${{ total_general }}</h5>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="area-impresion">
+			<div class="row mb-3">
+				<div class="col-4">
+					<strong>Fecha:</strong> {{ campana.fecha|date:'d/m/Y' }}
+				</div>
+
+				<div class="col-8">
+					<table class="table table-sm table-bordered text-center align-middle">
+						<thead>
+							<tr>
+								{% for prod in productos_info %}
+									<th>{{ prod.producto__nombre }}</th>
+								{% endfor %}
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								{% for prod in productos_info %}
+									<td>
+										{% if prod.precio_compra %}
+											${{ prod.precio_compra }}
+										{% endif %}
+									</td>
+								{% endfor %}
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- TABLA -->
+			<div class="card shadow-sm">
+				<div class="card-body p-0">
+					<div class="table-responsive" style="max-height:75vh; overflow:auto;">
+						<table class="table table-hover table-bordered table-striped table-sm align-middle text-center mb-0">
+							<thead class="table-light sticky-top">
+								<tr>
+									<th>#</th>
+									<th>Turno</th>
+									<th>Tutor</th>
+									<th>Mascota</th>
+									<th>Observaciones</th>
+									<th>Especie</th>
+									<th>Género</th>
+									<th>Peso</th>
+									<th>Origen</th>
+									<th>Barrio</th>
+									<th>Parroquia</th>
+									<th>Servicio</th>
+
+									{% for item in items %}
+										<th>{{ item }}</th>
+									{% endfor %}
+
+									<th>Extras</th>
+									<th>Otros</th>
+									<th>Total</th>
+									<th>Método</th>
+									<th>Nota</th>
+									<th>Recaudador</th>
+								</tr>
+							</thead>
+
+							<tbody>
+								{% for reg in registros %}
+									<tr>
+										<td>{{ forloop.counter }}</td>
+										<td>{{ reg.numero_turno }}</td>
+										<td class="text-start">{{ reg.nombres_tutor }}</td>
+										<td class="text-start">{{ reg.nombre }}</td>
+										<td class="text-start small">{{ reg.observaciones }}</td>
+										<td>{{ reg.especie }}</td>
+										<td>{{ reg.genero }}</td>
+										<td>{{ reg.peso }}</td>
+
+										<td>
+											{% if reg.vulnerable %}
+												<span class="badge bg-danger-subtle text-dark">Vulnerable</span>
+											{% else %}
+												<span class="badge bg-info-subtle text-dark">Doméstico</span>
+											{% endif %}
+										</td>
+
+										<td>{{ reg.barrio }}</td>
+										<td>{{ reg.parroquia }}</td>
+
+										<!-- SERVICIO -->
+										<td class="{% if reg.pago.servicio %}bg-info-subtle{% endif %}">
+											{% if reg.pago.servicio %}
+												<strong>${{ reg.pago.servicio }}</strong>
+											{% endif %}
+										</td>
+
+										<!-- PRODUCTOS -->
+										{% for item in items %}
+											{% with cantidad=reg.pago.productos|get_item:item %}
+												<td class="{% if cantidad %}bg-warning-subtle{% endif %}">
+													{% if cantidad %}
+														{{ cantidad }}
+													{% endif %}
+												</td>
+											{% endwith %}
+										{% endfor %}
+
+										<!-- EXTRAS -->
+										<td class="{% if reg.pago.extras %}bg-success-subtle{% endif %}">
+											{% for extra in reg.pago.extras %}
+												<div class="small">
+													{{ extra.descripcion }}
+													<strong>${{ extra.costo }}</strong>
+												</div>
+											{% endfor %}
+										</td>
+
+										<!-- OTROS -->
+										<td class="{% if reg.pago.otros %}bg-secondary-subtle{% endif %}">
+											{% for otro in reg.pago.otros %}
+												<div class="small">
+													{{ otro.descripcion }}
+													<strong>${{ otro.costo }}</strong>
+												</div>
+											{% endfor %}
+										</td>
+
+										<!-- TOTAL -->
+										<td class="fw-bold">${{ reg.pago.total }}</td>
+
+										<!-- METODO -->
+										<td>
+											{% if reg.pago.metodo == 'Efectivo' %}
+												<span class="badge bg-success">{{ reg.pago.metodo }}</span>
+											{% elif reg.pago.metodo == 'Transferencia' %}
+												<span class="badge bg-primary">{{ reg.pago.metodo }}</span>
+											{% else %}
+												<span class="badge bg-secondary">{{ reg.pago.metodo }}</span>
+											{% endif %}
+										</td>
+
+										<!-- NOTA -->
+										<td class="text-start small">{{ reg.pago.nota }}</td>
+										<!-- Cobro -->
+										<td class="text-start small">{{ reg.pago.usuario.first_name|default:user.username }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot class="table-light fw-bold">
+								<tr>
+									<td colspan="11" class="text-end">TOTALES:</td>
+
+									<!-- SERVICIO -->
+									<td class="bg-info-subtle">${{ totales.servicio }}</td>
+
+									<!-- PRODUCTOS -->
+									{% for item in items %}
+										{% with cantidad=totales.productos|get_item:item %}
+											<td class="bg-warning-subtle">
+												{% if cantidad %}
+													{{ cantidad }}
+												{% endif %}
+											</td>
+										{% endwith %}
+									{% endfor %}
+									<!-- EXTRAS -->
+									<td class="bg-success-subtle">
+										{% if totales.extras %}
+											${{ totales.extras }}
+										{% endif %}
+									</td>
+									<!-- OTROS -->
+									<td class="bg-secondary-subtle">
+										{% if totales.otros %}
+											${{ totales.otros }}
+										{% endif %}
+									</td>
+									<!-- TOTAL -->
+									<td class="fw-bold">
+										{% if totales.ingresos %}
+											${{ totales.ingresos }}
+										{% endif %}
+									</td>
+									<!-- Método -->
+									<td></td>
+
+									<!-- Nota -->
+									<td></td>
+
+									<!-- Usuario -->
+									<td></td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endblock %}
+</div>
