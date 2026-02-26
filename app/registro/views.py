@@ -152,6 +152,7 @@ class RegistradoListView(ListView):
         """
         campana_id = self.kwargs.get("campana_id")
         if request.headers.get("x-requested-with") == "XMLHttpRequest":  # Check for Ajax requests
+            campana = get_object_or_404(Campana, id=campana_id)
             registros = list(
                 Registro.objects.filter(inscripcion__campana=campana_id).values(
                     "foto",
@@ -162,7 +163,6 @@ class RegistradoListView(ListView):
                     "sexo",
                     "edad_anos",
                     "edad_meses",
-                    "fecha_registro",
                     "observaciones",
                     "numero_turno",
                     "nombres_tutor",
@@ -175,7 +175,7 @@ class RegistradoListView(ListView):
                     if reg["foto"]
                     else ""
                 )
-            return JsonResponse({"registros": registros})
+            return JsonResponse({"registros": registros, "fecha_campana": campana.fecha})
         return super().get(request, *args, **kwargs)
 
 

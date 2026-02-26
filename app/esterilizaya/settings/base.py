@@ -181,7 +181,7 @@ MEDIA_URL = "media/"
 # Nota: De esta forma no compartimos con la carpeta del código
 MEDIA_ROOT = BASE_DIR.parent / "media"
 
-# Default Boostrap settings
+# Configuraciones Bootstrap por defecto
 BOOTSTRAP5 = {
     "css_url": "/static/css/bootstrap.min.css",
     "javascript_url": "/static/js/bootstrap.bundle.min.js",
