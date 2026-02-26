@@ -13,9 +13,13 @@ updates:
     - dependency-name: Django
       versions:
        - "<5.0"
+   cooldown:
+    default-days: 7
  - package-ecosystem: docker
    directory: "/app"
    schedule:
     interval: weekly
    labels:
     - dependencies
+   cooldown:
+    default-days: 7
