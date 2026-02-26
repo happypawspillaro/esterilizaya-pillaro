@@ -3,11 +3,3 @@ line-length = 120
 
 [tool.isort]
 profile = "black"
-
-[tool.codespell]
-skip = "./app/static/*,./app/__pycache__/*,./app/*/__pycache__/*,./app/*/migrations/*,./extra/*,./node_modules"
-
-# 'quiet-level' 2 oculta advertencias sobre el archivo de configuración
-quiet-level = 2
-ignore-words = 'PALABRAS_ACEPTADAS.txt'
-count=true

@@ -1,0 +1,6 @@
+[codespell]
+skip = ./app/static/*,./app/__pycache__/*,./app/*/__pycache__/*,./app/*/migrations/*,./extra/*,./node_modules
+
+quiet-level = 2
+count =
+ignore-words = PALABRAS_ACEPTADAS.txt
