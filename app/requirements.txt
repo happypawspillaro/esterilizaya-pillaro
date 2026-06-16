@@ -4,4 +4,4 @@ easy-thumbnails==2.*
 mysqlclient==2.*
 pillow==12.*
 uwsgi==2.*
-weasyprint==68.*
+weasyprint==69.*
