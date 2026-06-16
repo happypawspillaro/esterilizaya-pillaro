@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM --platform=$BUILDPLATFORM python:3.14.5-alpine AS builder
+FROM --platform=$BUILDPLATFORM python:3.15.0b2-alpine AS builder
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -26,7 +26,7 @@ RUN apk add --no-cache --virtual \
     pip install --no-cache-dir -r requirements.txt && \
     apk del build-deps
 
-FROM --platform=$BUILDPLATFORM python:3.14.5-alpine AS base
+FROM --platform=$BUILDPLATFORM python:3.15.0b2-alpine AS base
 WORKDIR /home/esterilizaya/code
 RUN apk add --no-cache \ 
       cairo=~1 \
