@@ -1,14 +1,13 @@
 ---
 name: Solicitud nueva función
 about: Sugiere una nueva idea para este proyecto
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **¿Es tu solicitud de nueva característica relacionada a un problema? Por favor describe a continuación.**
-Una clara y concisa descripción de que es un problema. Por ejemplo: Siempre estoy frustrado cuando [...] 
+Una clara y concisa descripción de que es un problema. Por ejemplo: Siempre estoy frustrado cuando [...]
 
 **Describe la solución que te gustaría ver**
 Una clara y concisa descripción de que quieres que ocurra. (Puedes incluir diagramas, imágenes, links)

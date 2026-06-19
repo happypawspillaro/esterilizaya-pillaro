@@ -1,10 +1,9 @@
 ---
 name: Reporte problemas
 about: Crea un reporte para ayudarnos a mejorar
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **Descripción del error**
@@ -26,16 +25,16 @@ Si aplica, añade capturas de pantalla para ayudar a explicar el problema.
 
 **Escritorio / PC (por favor, completa la siguiente información):**
 
-* Sistema operativo: [por ejemplo, Windows, macOS]
-* Navegador: [por ejemplo, Chrome, Safari]
-* Versión: [por ejemplo, 22]
+- Sistema operativo: [por ejemplo, Windows, macOS]
+- Navegador: [por ejemplo, Chrome, Safari]
+- Versión: [por ejemplo, 22]
 
-**Smartphone / Celular (por favor, completa la siguiente información):**
+**Tablet / Celular (por favor, completa la siguiente información):**
 
-* Dispositivo: [por ejemplo, iPhone 15]
-* Sistema operativo: [por ejemplo, iOS 17.4]
-* Navegador: [por ejemplo, navegador predeterminado, Safari]
-* Versión: [por ejemplo, 22]
+- Dispositivo: [por ejemplo, iPhone 15]
+- Sistema operativo: [por ejemplo, iOS 17.4]
+- Navegador: [por ejemplo, navegador predeterminado, Safari]
+- Versión: [por ejemplo, 22]
 
 **Contexto adicional**
 Añade aquí cualquier otro contexto o detalle sobre el problema.
