@@ -2,6 +2,6 @@ django-bootstrap5==26.*
 django==6.*
 easy-thumbnails==2.*
 mysqlclient==2.*
-pillow==12.*
+pillow==13.*
 uwsgi==2.*
 weasyprint==70.*
